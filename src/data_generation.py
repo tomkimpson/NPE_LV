@@ -9,8 +9,8 @@ from pathlib import Path
 from tqdm import tqdm
 import warnings
 
-from .simulator import simulate_lv_batch
-from .utils import create_lv_prior, create_time_grid, flatten_trajectory, check_trajectory_validity
+from simulator import simulate_lv_batch
+from utils import create_lv_prior, create_time_grid, flatten_trajectory, check_trajectory_validity
 
 
 class LVDataGenerator:
@@ -74,7 +74,7 @@ class LVDataGenerator:
             theta = self.prior.sample((1,)).numpy()[0]
         
         # Simulate trajectory
-        from .simulator import gillespie_lv
+        from simulator import gillespie_lv
         
         try:
             _, trajectory = gillespie_lv(
@@ -91,7 +91,7 @@ class LVDataGenerator:
                 
             # Convert to observation
             if self.use_summary_stats:
-                from .utils import compute_summary_stats
+                from utils import compute_summary_stats
                 x = compute_summary_stats(trajectory, self.t_grid)
             else:
                 x = flatten_trajectory(trajectory)
@@ -153,7 +153,7 @@ class LVDataGenerator:
                     
                     if check_trajectory_validity(trajectory):
                         if self.use_summary_stats:
-                            from .utils import compute_summary_stats
+                            from utils import compute_summary_stats
                             x = compute_summary_stats(trajectory, self.t_grid)
                         else:
                             x = flatten_trajectory(trajectory)

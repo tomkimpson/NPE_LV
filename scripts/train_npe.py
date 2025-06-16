@@ -102,17 +102,21 @@ def main():
         print("Training completed successfully!")
         
         # Print training statistics
-        if 'train_log_probs' in training_info:
-            final_train_loss = training_info['train_log_probs'][-1]
-            final_val_loss = training_info['validation_log_probs'][-1]
-            print(f"Final training loss: {final_train_loss:.4f}")
-            print(f"Final validation loss: {final_val_loss:.4f}")
+        try:
+            if hasattr(training_info, '__contains__') and 'train_log_probs' in training_info:
+                final_train_loss = training_info['train_log_probs'][-1]
+                final_val_loss = training_info['validation_log_probs'][-1]
+                print(f"Final training loss: {final_train_loss:.4f}")
+                print(f"Final validation loss: {final_val_loss:.4f}")
+            else:
+                print("Training info format not recognized - skipping loss display")
+        except Exception as e:
+            print(f"Could not display training statistics: {e}")
         
-        # Save model
+        # Save model (exclude potentially problematic training_info)
         save_metadata = {
             'training_args': vars(args),
             'data_metadata': metadata,
-            'training_info': training_info
         }
         
         inference.save_model(args.output, save_metadata)

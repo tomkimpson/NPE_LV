@@ -9,10 +9,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import numpy as np
 from sbi.inference import SNPE
-from sbi.utils import posterior_nn
+from sbi.neural_nets import posterior_nn
 
-from .utils import create_lv_prior
-from .data_generation import LVDataGenerator
+from utils import create_lv_prior
+from data_generation import LVDataGenerator
 
 
 class LVInference:

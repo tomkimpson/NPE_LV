@@ -115,5 +115,5 @@ def test_parameter_sensitivity():
 
 if __name__ == '__main__':
     test_single_simulation()
-    test_multiple_simulations()
-    test_parameter_sensitivity()
+    #test_multiple_simulations()
+    #test_parameter_sensitivity()

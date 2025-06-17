@@ -1,0 +1,3 @@
+[submodule "external/JSFGermano2024"]
+	path = external/JSFGermano2024
+	url = git@github.com:DGermano8/JSFGermano2024.git

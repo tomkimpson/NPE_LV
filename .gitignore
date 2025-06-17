@@ -5,6 +5,9 @@ workflows/
 results*/
 sbi-logs/
 
+# External submodules are tracked by .gitmodules
+# Their contents are managed separately
+
 # Python
 __pycache__/
 *.py[cod]

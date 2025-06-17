@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Dict, List, Tuple, Optional, Any
 import warnings
 
-from ..TEIRV.teirv_utils import preprocess_clinical_data
+from .teirv_utils import preprocess_clinical_data
 
 
 class ClinicalDataLoader:
@@ -313,7 +313,7 @@ def validate_clinical_data_compatibility():
         print(f"\n✅ Found {len(study.loader.patient_ids)} patient datasets")
         
         # Check time grid compatibility
-        from teirv_utils import create_teirv_time_grid
+        from .teirv_utils import create_teirv_time_grid
         target_grid = create_teirv_time_grid(14.0, 1.0)
         
         compatible_patients = 0

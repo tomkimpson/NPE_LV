@@ -21,3 +21,4 @@ dependencies:
   - pip:
     - sbi
     - tensorboard
+    - corner

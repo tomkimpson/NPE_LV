@@ -8,6 +8,7 @@ from pathlib import Path
 import torch
 import numpy as np
 import matplotlib.pyplot as plt
+from datetime import datetime
 
 # Add src to path
 sys.path.append(str(Path(__file__).parent.parent / 'src'))
@@ -66,13 +67,18 @@ def main():
     # Inference parameters
     parser.add_argument('--num_samples', type=int, default=5000,
                        help='Number of posterior samples')
-    parser.add_argument('--output_dir', type=str, default='results',
-                       help='Output directory for results')
+    parser.add_argument('--output_dir', type=str, default=None,
+                       help='Output directory for results (default: results/TIMESTAMP)')
     
     parser.add_argument('--seed', type=int, default=123,
                        help='Random seed')
     
     args = parser.parse_args()
+    
+    # Create timestamped output directory
+    if args.output_dir is None:
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        args.output_dir = f"results/inference_{timestamp}"
     
     print("Running NPE inference...")
     print(f"Model: {args.model}")
@@ -174,7 +180,7 @@ def main():
         fig1.savefig(Path(args.output_dir) / 'posterior_marginals.png', dpi=150, bbox_inches='tight')
         print("Saved posterior marginals plot")
         
-        # Pairwise plot
+        # Pairwise plot (custom)
         fig2 = inference.plot_pairwise(
             posterior_samples,
             true_theta=torch.tensor(theta_true) if theta_true is not None else None
@@ -182,9 +188,45 @@ def main():
         fig2.savefig(Path(args.output_dir) / 'posterior_pairwise.png', dpi=150, bbox_inches='tight')
         print("Saved pairwise posterior plot")
         
+        # Corner plot
+        try:
+            import corner
+            param_labels = [r'$\alpha$', r'$\beta$', r'$\delta$', r'$\gamma$']
+            
+            # Prior bounds for plot limits
+            prior_bounds = [(0.01, 1.0), (0.001, 0.1), (0.001, 0.1), (0.01, 1.0)]
+            
+            fig3 = corner.corner(
+                posterior_samples.numpy(),
+                labels=param_labels,
+                truths=theta_true if theta_true is not None else None,
+                truth_color='orange',
+                color='teal',
+                range=prior_bounds,
+                plot_datapoints=True,
+                plot_density=True,
+                plot_contours=True,
+                data_kwargs={'alpha': 0.2, 'color': 'lightblue'},
+                hist_kwargs={'alpha': 0.8, 'color': 'teal'},
+                contour_kwargs={'colors': 'teal'},
+                smooth=1.0,
+                smooth1d=1.0,
+                quantiles=[0.16, 0.5, 0.84],
+                show_titles=True,
+                title_kwargs={"fontsize": 12},
+                label_kwargs={"fontsize": 14}
+            )
+            fig3.savefig(Path(args.output_dir) / 'posterior_corner.png', dpi=150, bbox_inches='tight')
+            print("Saved corner plot")
+            
+        except ImportError:
+            print("Corner package not available - install with 'pip install corner'")
+        except Exception as e:
+            print(f"Failed to create corner plot: {e}")
+        
         # True trajectory plot (if available)
         if trajectory_true is not None:
-            fig3, ax = plt.subplots(figsize=(10, 6))
+            fig4, ax = plt.subplots(figsize=(10, 6))
             t_grid = create_time_grid(args.t_max, args.dt)
             
             ax.plot(t_grid, trajectory_true[:, 0], 'b-', label='Prey (true)', linewidth=2)
@@ -196,7 +238,7 @@ def main():
             ax.legend()
             ax.grid(True, alpha=0.3)
             
-            fig3.savefig(Path(args.output_dir) / 'true_trajectory.png', dpi=150, bbox_inches='tight')
+            fig4.savefig(Path(args.output_dir) / 'true_trajectory.png', dpi=150, bbox_inches='tight')
             print("Saved true trajectory plot")
         
         plt.close('all')

@@ -8,12 +8,14 @@ from torch.distributions import LogNormal, Independent, Uniform, TransformedDist
 import matplotlib.pyplot as plt
 
 
-class TEIRVPrior:
+class TEIRVPrior(torch.distributions.Distribution):
     """
     Custom prior distribution for TEIRV parameters matching original paper.
     
     Handles the mixed Uniform and log-Uniform distributions used in 
     Germano et al. (2024) JSF paper.
+    
+    Inherits from torch.distributions.Distribution for SBI compatibility.
     """
     
     def __init__(self):
@@ -32,6 +34,9 @@ class TEIRVPrior:
         self.phi_dist = Uniform(*self.phi_bounds)
         self.rho_dist = Uniform(*self.rho_bounds)
         self.lnv0_dist = Uniform(*self.lnv0_bounds)
+        
+        # Initialize parent Distribution class
+        super().__init__(event_shape=torch.Size([6]), validate_args=False)
     
     def sample(self, sample_shape=torch.Size()):
         """Sample from the prior distribution."""

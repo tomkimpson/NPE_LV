@@ -93,7 +93,7 @@ class TEIRVDataGenerator:
                 initial_conditions=ic,
                 t_max=self.t_max,
                 t_grid=self.t_grid,
-                max_steps=1000000
+                max_steps=100000  # Reduced from 1M to 100K for performance
             )
             
             # Check validity

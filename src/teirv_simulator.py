@@ -21,7 +21,7 @@ def gillespie_teirv(
     initial_conditions: Dict[str, float],
     t_max: float,
     t_grid: Optional[np.ndarray] = None,
-    max_steps: int = 1000000,
+    max_steps: int = 100000,
     extinction_threshold: float = 1e-6
 ) -> Tuple[np.ndarray, np.ndarray]:
     """
@@ -104,6 +104,8 @@ def gillespie_teirv(
         if (E + I <= extinction_threshold and V <= extinction_threshold):
             break
             
+
+        
         # Calculate reaction propensities
         # Scale β and φ as in original paper (see tiv.py lines 54-55)
         a1 = beta * 1e-9 * T * V           # Infection: T + V → E + V
@@ -123,7 +125,6 @@ def gillespie_teirv(
         # Sample time to next reaction
         tau = np.random.exponential(1.0 / a_total)
         t += tau
-        
         # Sample which reaction occurs
         r = np.random.uniform(0, a_total)
         
@@ -171,6 +172,10 @@ def gillespie_teirv(
         states.append((T, E, I, R, V))
         step += 1
     
+
+    print("Finished simulation")
+    print(t,tau,t_max)
+
     # Convert to arrays
     times = np.array(times)
     states = np.array(states)
@@ -258,7 +263,7 @@ def simulate_teirv_batch(
             ic['V'] = theta_batch[i, 5]  # V0 is last parameter
             
             _, traj = gillespie_teirv(
-                theta_batch[i], ic, t_max, t_grid, **kwargs
+                theta_batch[i], ic, t_max, t_grid, max_steps=100000, **kwargs
             )
             trajectories[i] = traj
             

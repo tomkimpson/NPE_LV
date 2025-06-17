@@ -10,8 +10,8 @@ import numpy as np
 # Add src to path
 sys.path.append(str(Path(__file__).parent.parent / 'src'))
 
-from teirv_simulator import gillespie_teirv
-from teirv_utils import create_teirv_prior, get_teirv_initial_conditions, create_teirv_time_grid
+from TEIRV.teirv_simulator import gillespie_teirv
+from TEIRV.teirv_utils import create_teirv_prior, get_teirv_initial_conditions, create_teirv_time_grid
 
 
 def test_single_simulation():

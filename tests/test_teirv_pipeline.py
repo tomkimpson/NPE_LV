@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 # Add src to path
 sys.path.append(str(Path(__file__).parent.parent / 'src'))
 
-from teirv_data_generation import TEIRVDataGenerator
-from teirv_inference import TEIRVInference
-from teirv_utils import create_teirv_prior
+from TEIRV.teirv_data_generation import TEIRVDataGenerator
+from TEIRV.teirv_inference import TEIRVInference
+from TEIRV.teirv_utils import create_teirv_prior
 
 
 def test_data_generation():

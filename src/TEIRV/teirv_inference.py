@@ -11,8 +11,8 @@ import numpy as np
 from sbi.inference import SNPE
 from sbi.neural_nets import posterior_nn
 
-from teirv_utils import create_teirv_prior, visualize_teirv_trajectory
-from teirv_data_generation import TEIRVDataGenerator
+from .teirv_utils import create_teirv_prior, visualize_teirv_trajectory
+from .teirv_data_generation import TEIRVDataGenerator
 
 
 class TEIRVInference:

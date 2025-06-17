@@ -9,8 +9,8 @@ from pathlib import Path
 from tqdm import tqdm
 import warnings
 
-from teirv_simulator import simulate_teirv_batch, check_teirv_trajectory_validity
-from teirv_utils import (create_teirv_prior, get_teirv_initial_conditions, 
+from .teirv_simulator import simulate_teirv_batch, check_teirv_trajectory_validity
+from .teirv_utils import (create_teirv_prior, get_teirv_initial_conditions, 
                         create_teirv_time_grid, apply_observation_model)
 
 
@@ -85,7 +85,7 @@ class TEIRVDataGenerator:
         ic['V'] = theta[5]  # V₀ is last parameter
         
         # Simulate trajectory
-        from teirv_simulator import gillespie_teirv
+        from .teirv_simulator import gillespie_teirv
         
         try:
             _, trajectory = gillespie_teirv(
@@ -93,7 +93,7 @@ class TEIRVDataGenerator:
                 initial_conditions=ic,
                 t_max=self.t_max,
                 t_grid=self.t_grid,
-                max_steps=100000  # Reduced from 1M to 100K for performance
+                max_steps=1000000
             )
             
             # Check validity
@@ -324,7 +324,7 @@ class TEIRVDataGenerator:
         ic['V'] = true_theta[5]
         
         # Simulate trajectory
-        from teirv_simulator import gillespie_teirv
+        from .teirv_simulator import gillespie_teirv
         
         _, trajectory = gillespie_teirv(
             theta=true_theta,

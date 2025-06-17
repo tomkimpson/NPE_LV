@@ -9,7 +9,7 @@ from pathlib import Path
 # Add src to path
 sys.path.append(str(Path(__file__).parent.parent / 'src'))
 
-from teirv_data_generation import TEIRVDataGenerator
+from TEIRV.teirv_data_generation import TEIRVDataGenerator
 
 
 def main():

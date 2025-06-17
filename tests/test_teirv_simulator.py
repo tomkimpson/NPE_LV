@@ -12,8 +12,8 @@ import matplotlib.pyplot as plt
 # Add src to path
 sys.path.append(str(Path(__file__).parent.parent / 'src'))
 
-from teirv_simulator import gillespie_teirv, simulate_teirv_batch, check_teirv_trajectory_validity
-from teirv_utils import (create_teirv_prior, get_teirv_initial_conditions, 
+from TEIRV.teirv_simulator import gillespie_teirv, simulate_teirv_batch, check_teirv_trajectory_validity
+from TEIRV.teirv_utils import (create_teirv_prior, get_teirv_initial_conditions, 
                         create_teirv_time_grid, apply_observation_model,
                         visualize_teirv_trajectory, get_teirv_fixed_parameters)
 

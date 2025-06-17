@@ -105,7 +105,7 @@ def gillespie_teirv(
             break
             
         # Calculate reaction propensities
-        # Note: Scale β and φ as in original paper
+        # Scale β and φ as in original paper (see tiv.py lines 54-55)
         a1 = beta * 1e-9 * T * V           # Infection: T + V → E + V
         a2 = phi * 1e-5 * T * I           # Interferon: T + I → R + I  
         a3 = rho * R                      # Reversion: R → T

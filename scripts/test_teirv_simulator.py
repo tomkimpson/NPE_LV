@@ -141,20 +141,21 @@ def test_clinical_data_format():
 
 
 def test_parameter_ranges():
-    """Test that parameter samples are in reasonable ranges."""
+    """Test that parameter samples are in reasonable ranges based on original paper."""
     print("\nTesting parameter ranges...")
     
     prior = create_teirv_prior()
     samples = prior.sample((1000,)).numpy()
     
     param_names = ['β', 'π', 'δ', 'φ', 'ρ', 'V₀']
+    # Correct expected ranges from original paper
     expected_ranges = [
-        (1e-12, 1e-6),   # β
-        (10, 1000),      # π
-        (0.1, 5),        # δ
-        (1e-12, 1e-6),   # φ
-        (0.01, 1),       # ρ
-        (100, 10000)     # V₀
+        (0.0, 20.0),     # β: Uniform(0, 20)
+        (200.0, 600.0),  # π: Uniform(200, 600)
+        (1.0, 11.0),     # δ: Uniform(1, 11)
+        (0.0, 15.0),     # φ: Uniform(0, 15)
+        (0.0, 1.0),      # ρ: Uniform(0, 1)
+        (1.0, 148.0)     # V₀: exp(Uniform(0, 5)) ≈ [1, 148]
     ]
     
     for i, (name, (low, high)) in enumerate(zip(param_names, expected_ranges)):
@@ -163,7 +164,8 @@ def test_parameter_ranges():
         in_range = np.all((param_samples >= low) & (param_samples <= high))
         
         print(f"{name}: mean={mean_val:.2e}, range_ok={in_range}")
-        print(f"  Sample range: [{np.min(param_samples):.2e}, {np.max(param_samples):.2e}]")
+        print(f"  Expected: [{low:.1f}, {high:.1f}]")
+        print(f"  Actual range: [{np.min(param_samples):.2e}, {np.max(param_samples):.2e}]")
 
 
 def main():

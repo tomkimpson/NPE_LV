@@ -4,21 +4,115 @@ Utility functions for TEIRV model NPE implementation.
 import numpy as np
 import torch
 from typing import Dict, Any, Tuple, Optional
-from torch.distributions import LogNormal, Independent
+from torch.distributions import LogNormal, Independent, Uniform, TransformedDistribution, ExpTransform
 import matplotlib.pyplot as plt
 
 
-def create_teirv_prior() -> Independent:
+class TEIRVPrior:
     """
-    Create LogNormal prior distribution for TEIRV parameters.
+    Custom prior distribution for TEIRV parameters matching original paper.
     
-    Based on Table in Germano et al. (2024):
-    - β (infection rate): LogNormal(log(2.5×10⁻⁹), 1.0)
-    - π (virion production): LogNormal(log(10²), 1.0)  
-    - δ (cell clearance): LogNormal(log(0.5), 1.0)
-    - φ (interferon protection): LogNormal(log(10⁻⁹), 2.0)
-    - ρ (reversion rate): LogNormal(log(0.1), 1.0)
-    - V₀ (initial virions): LogNormal(log(10³), 1.0)
+    Handles the mixed Uniform and log-Uniform distributions used in 
+    Germano et al. (2024) JSF paper.
+    """
+    
+    def __init__(self):
+        # Parameter bounds from original paper config file
+        self.beta_bounds = (0.0, 20.0)        # β: infection rate
+        self.pi_bounds = (200.0, 600.0)       # π: virion production
+        self.delta_bounds = (1.0, 11.0)       # δ: cell clearance  
+        self.phi_bounds = (0.0, 15.0)         # φ: interferon protection
+        self.rho_bounds = (0.0, 1.0)          # ρ: reversion rate
+        self.lnv0_bounds = (0.0, 5.0)         # ln(V₀): log initial virions
+        
+        # Create individual distributions
+        self.beta_dist = Uniform(*self.beta_bounds)
+        self.pi_dist = Uniform(*self.pi_bounds)
+        self.delta_dist = Uniform(*self.delta_bounds)
+        self.phi_dist = Uniform(*self.phi_bounds)
+        self.rho_dist = Uniform(*self.rho_bounds)
+        self.lnv0_dist = Uniform(*self.lnv0_bounds)
+    
+    def sample(self, sample_shape=torch.Size()):
+        """Sample from the prior distribution."""
+        if isinstance(sample_shape, int):
+            sample_shape = torch.Size([sample_shape])
+        elif isinstance(sample_shape, tuple):
+            sample_shape = torch.Size(sample_shape)
+            
+        # Sample each parameter
+        beta = self.beta_dist.sample(sample_shape)
+        pi = self.pi_dist.sample(sample_shape)
+        delta = self.delta_dist.sample(sample_shape)
+        phi = self.phi_dist.sample(sample_shape)
+        rho = self.rho_dist.sample(sample_shape)
+        lnv0 = self.lnv0_dist.sample(sample_shape)
+        
+        # Transform ln(V₀) to V₀
+        v0 = torch.exp(lnv0)
+        
+        # Stack parameters: [β, π, δ, φ, ρ, V₀]
+        if len(sample_shape) == 0:
+            return torch.stack([beta, pi, delta, phi, rho, v0])
+        else:
+            return torch.stack([beta, pi, delta, phi, rho, v0], dim=-1)
+    
+    def log_prob(self, value):
+        """Compute log probability of parameter values."""
+        # Extract parameters
+        beta, pi, delta, phi, rho, v0 = value.unbind(-1)
+        
+        # Compute log probabilities for each parameter
+        log_prob = torch.zeros_like(beta)
+        
+        # Uniform distributions
+        log_prob += self.beta_dist.log_prob(beta)
+        log_prob += self.pi_dist.log_prob(pi)
+        log_prob += self.delta_dist.log_prob(delta)
+        log_prob += self.phi_dist.log_prob(phi)
+        log_prob += self.rho_dist.log_prob(rho)
+        
+        # Log-uniform for V₀: p(V₀) = p(ln(V₀)) / V₀
+        lnv0 = torch.log(v0)
+        log_prob += self.lnv0_dist.log_prob(lnv0) - lnv0  # Jacobian correction
+        
+        return log_prob
+    
+    @property
+    def support(self):
+        """Return parameter support bounds."""
+        return {
+            'beta': self.beta_bounds,
+            'pi': self.pi_bounds, 
+            'delta': self.delta_bounds,
+            'phi': self.phi_bounds,
+            'rho': self.rho_bounds,
+            'v0': (np.exp(self.lnv0_bounds[0]), np.exp(self.lnv0_bounds[1]))
+        }
+
+
+def create_teirv_prior() -> TEIRVPrior:
+    """
+    Create prior distribution for TEIRV parameters.
+    
+    Based on actual priors used in Germano et al. (2024) JSF paper.
+    Source: external/JSFGermano2024/TEIVR_Results/particle-filter-example-tiv_covid/config/cli-refractory-tiv-jsf.toml
+    Lines 62-66 and 52:
+    
+    prior.beta = { name = "uniform", args.loc = 0, args.scale = 20}
+    prior.phi = { name = "uniform", args.loc = 0, args.scale = 15}
+    prior.rho = { name = "uniform", args.loc = 0, args.scale = 1}
+    prior.delta = { name = "uniform", args.loc = 1.0, args.scale = 10}
+    prior.pi = { name = "uniform", args.loc = 200, args.scale = 400}
+    prior.lnV0 = { name = "uniform", args.loc = 0, args.scale = 5 }
+    
+    Parameter interpretations:
+    - β (infection rate): Uniform(0, 20)
+    - π (virion production): Uniform(200, 600)  
+    - δ (cell clearance): Uniform(1, 11)
+    - φ (interferon protection): Uniform(0, 15)
+    - ρ (reversion rate): Uniform(0, 1)
+    - V₀ (initial virions): exp(Uniform(0, 5)) ≈ [1, 148]
     
     Fixed parameters (not inferred):
     - k (E→I progression): 4
@@ -26,31 +120,10 @@ def create_teirv_prior() -> Independent:
     
     Returns:
     --------
-    prior : torch.distributions.Independent
-        Prior over [β, π, δ, φ, ρ, V₀]
+    prior : TEIRVPrior
+        Prior distribution over [β, π, δ, φ, ρ, V₀]
     """
-    # Define individual LogNormal distributions
-    log_means = torch.tensor([
-        np.log(2.5e-9),  # β
-        np.log(1e2),     # π
-        np.log(0.5),     # δ  
-        np.log(1e-9),    # φ
-        np.log(0.1),     # ρ
-        np.log(1e3)      # V₀
-    ])
-    
-    log_stds = torch.tensor([
-        1.0,  # β
-        1.0,  # π
-        1.0,  # δ
-        2.0,  # φ (wider uncertainty)
-        1.0,  # ρ
-        1.0   # V₀
-    ])
-    
-    # Create multivariate LogNormal
-    lognormal_dist = LogNormal(log_means, log_stds)
-    return Independent(lognormal_dist, 1)
+    return TEIRVPrior()
 
 
 def get_teirv_initial_conditions(V0: float = 1e3) -> Dict[str, float]:

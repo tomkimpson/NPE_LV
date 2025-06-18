@@ -172,10 +172,6 @@ def gillespie_teirv(
         states.append((T, E, I, R, V))
         step += 1
     
-
-    print("Finished simulation")
-    print(t,tau,t_max)
-
     # Convert to arrays
     times = np.array(times)
     states = np.array(states)

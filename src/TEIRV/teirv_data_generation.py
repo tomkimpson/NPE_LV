@@ -155,7 +155,10 @@ class TEIRVDataGenerator:
         
         self.total_simulations += n_samples
         
-        for i in tqdm(range(0, n_samples, batch_size), desc="Generating TEIRV data"):
+        # Create progress bar for individual samples
+        pbar = tqdm(total=n_samples, desc="Generating TEIRV data", unit="samples")
+        
+        for i in range(0, n_samples, batch_size):
             current_batch_size = min(batch_size, n_samples - i)
             
             # Sample parameters
@@ -200,12 +203,21 @@ class TEIRVDataGenerator:
                             
                         theta_list.append(theta_batch[j])
                         x_list.append(x)
+                        # Update progress bar for each valid sample
+                        pbar.update(1)
                     else:
                         self.failed_simulations += 1
+                        # Still update progress for failed samples to show progress
+                        pbar.update(1)
                         
             except Exception as e:
                 warnings.warn(f"Batch simulation failed: {e}")
                 self.failed_simulations += current_batch_size
+                # Update progress bar for failed batch
+                pbar.update(current_batch_size)
+        
+        # Close progress bar
+        pbar.close()
         
         if len(theta_list) == 0:
             raise RuntimeError("No valid simulations generated")

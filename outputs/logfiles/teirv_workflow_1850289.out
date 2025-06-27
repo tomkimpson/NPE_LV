@@ -1,0 +1,64 @@
+==========================================
+TEIRV NPE Full Workflow
+==========================================
+Job ID: 1850289
+Node: gina1
+Start time: Fri Jun 27 15:50:23 AEST 2025
+Workflow name: production_run_20250627_155023
+Training samples: 50000
+Device: cuda
+Max epochs: 200
+==========================================
+Checking CUDA availability...
+CUDA available: True
+CUDA devices: 1
+NVIDIA GPU info:
+Fri Jun 27 15:50:28 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:01:00.0 Off |                    0 |
+| N/A   27C    P0             60W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+==========================================
+Starting TEIRV workflow at Fri Jun 27 15:50:29 AEST 2025
+🚀 TEIRV NPE Complete Pipeline
+==================================================
+📁 Workflow directory: workflows/production_run_20250627_155023
+📊 Training samples: 50000
+🔧 Device: cuda
+
+🔬 Step 1: Generating training data...
+🔬 TEIRV Training Data Generation
+==================================================
+Samples: 50000
+Simulation timespan: [0, 14.0] days
+Observation grid: 15 points at 1.0-day intervals
+Observation type: RT-PCR only
+RT-PCR noise: 1.0
+Detection limit: -0.65
+Output: workflows/production_run_20250627_155023/training_data.pkl
+
+TEIRV Parameter Priors:
+------------------------------
+  β (infection rate):       Uniform(0.0, 20.0)
+  π (virion production):    Uniform(200.0, 600.0)
+  δ (cell clearance):       Uniform(1.0, 11.0)
+  φ (interferon protection): Uniform(0.0, 15.0)
+  ρ (reversion rate):       Uniform(0.0, 1.0)
+  V₀ (initial virions):     exp(Uniform(0.0, 5.0)) ≈ [1, 148]
+
+Starting data generation...

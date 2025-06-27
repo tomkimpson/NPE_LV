@@ -1,0 +1,7 @@
+usage: TEIRV_workflow.py [-h] [--seed SEED] [--device {cpu,cuda}]
+                         {generate,train,inference,demo,full} ...
+TEIRV_workflow.py: error: unrecognized arguments: --device cuda
+
+real	0m34.593s
+user	0m5.325s
+sys	0m2.321s

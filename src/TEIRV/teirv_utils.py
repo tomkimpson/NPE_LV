@@ -5,6 +5,7 @@ import numpy as np
 import torch
 from typing import Dict, Any, Tuple, Optional
 from torch.distributions import LogNormal, Independent, Uniform, TransformedDistribution, ExpTransform
+from torch.distributions.constraints import Constraint, real
 import matplotlib.pyplot as plt
 
 
@@ -85,7 +86,12 @@ class TEIRVPrior(torch.distributions.Distribution):
     
     @property
     def support(self):
-        """Return parameter support bounds."""
+        """Return parameter support constraint for SBI compatibility."""
+        # SBI expects a constraint object, not a dictionary
+        return real
+    
+    def get_parameter_bounds(self) -> Dict[str, Tuple[float, float]]:
+        """Return parameter bounds as dictionary for reference."""
         return {
             'beta': self.beta_bounds,
             'pi': self.pi_bounds, 

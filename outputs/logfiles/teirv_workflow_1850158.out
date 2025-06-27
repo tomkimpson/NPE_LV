@@ -1,0 +1,66 @@
+==========================================
+TEIRV NPE Full Workflow
+==========================================
+Job ID: 1850158
+Node: gina1
+Start time: Fri Jun 27 15:45:05 AEST 2025
+Workflow name: production_run_20250627_154505
+Training samples: 50000
+Device: cuda
+Max epochs: 200
+==========================================
+Checking CUDA availability...
+CUDA available: True
+CUDA devices: 1
+NVIDIA GPU info:
+Fri Jun 27 15:45:56 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:01:00.0 Off |                    0 |
+| N/A   26C    P0             59W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+==========================================
+Starting TEIRV workflow at Fri Jun 27 15:45:57 AEST 2025
+==========================================
+Workflow completed at Fri Jun 27 15:46:31 AEST 2025
+Exit code: 2
+❌ WORKFLOW FAILED with exit code 2
+Check the log files for details:
+  - Standard output: outputs/logfiles/teirv_workflow_1850158.out
+  - Standard error: outputs/logfiles/teirv_workflow_1850158.err
+==========================================
+
++------------------ Job Report: 1850158 (COMPLETED) -------------------+
+| Memory (RAM)  [                    ]  1.1% (183.2 MB peak / 16 GB)   |
+| CPU           [                    ]  1.6% average                   |
+| GPU           [###                 ] 18.0% average                   |
+| Time          [>                   ]  1.0% (0-00:02:18 / 0-04:00:00) |
+|                                                                      |
+| Lustre Filesystem:                                                   |
+|   Path    Total Read    Total Write    Total IOPS                    |
+|   ------  ------------  -------------  ------------                  |
+|   /apps   716 KB        0 B            1                             |
+|   /fred   410.3 MB      0 B            10.9 K                        |
+|   /home   27.4 MB       0 B            9                             |
+|   OS      4 KB          0 B            12                            |
+|                                                                      |
+| Warnings:                                                            |
+|   - Too much memory requested                                        |
+|   - CPU usage is low                                                 |
+|   - GPU usage is low                                                 |
+|   - Too much time requested                                          |
++----------------------------------------------------------------------+

@@ -9,8 +9,8 @@ from pathlib import Path
 from tqdm import tqdm
 import warnings
 
-from simulator import simulate_lv_batch
-from utils import create_lv_prior, create_time_grid, flatten_trajectory, check_trajectory_validity
+from .simulator import simulate_lv_batch
+from .utils import create_lv_prior, create_time_grid, flatten_trajectory, check_trajectory_validity
 
 
 class LVDataGenerator:

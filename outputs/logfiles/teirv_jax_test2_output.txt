@@ -1,0 +1,40 @@
+JAX TEIRV Simulator Test Suite
+============================================================
+============================================================
+Testing GPU availability...
+   Available devices: 1
+     Device 0: NVIDIA A100-SXM4-80GB (gpu)
+   🚀 GPU available: 1 GPU(s) detected
+     GPU 0: cuda:0
+   ⚠️  GPU memory test failed: 'Device' object is not callable
+✅ GPU availability test completed
+============================================================
+Testing JAX TEIRV Simulator...
+1. Setting up simulation parameters...
+   Parameters: [ 10.605216  491.0657      7.672406    5.835181    0.7437396   7.9351134]
+   Initial conditions: {'T': 80000000.0, 'E': 1.0, 'I': 0.0, 'R': 0.0, 'V': np.float32(7.9351134)}
+   Time grid: 15 points from 0 to 14.0 days
+2. Testing single simulation...
+   Simulation completed in 386.559s
+   Output shapes: times=(15,), states=(15, 5)
+   Final state: T=8.0e+07, E=2412.0, I=799.0, R=659050.0, V=2.6e+04
+3. Testing batch simulation...
+slurmstepd: error: *** JOB 1265702 ON gina4 CANCELLED AT 2025-06-17T18:37:52 DUE TO TIME LIMIT ***
+
++-------------------- Job Report: 1265702 (TIMEOUT) --------------------+
+| Memory (RAM)  [###########         ] 56.4% (2.3 GB peak / 4 GB)       |
+| CPU           [################### ] 95.0% average                    |
+| GPU           [############        ] 61.0% average                    |
+| Time          [------------------->] 103.3% (0-00:10:20 / 0-00:10:00) |
+|                                                                       |
+| Lustre Filesystem:                                                    |
+|   Path    Total Read    Total Write    Total IOPS                     |
+|   ------  ------------  -------------  ------------                   |
+|   /apps   30.9 MB       0 B            6                              |
+|   /fred   353.9 MB      1.9 KB         3.8 K                          |
+|   /home   27.4 MB       0 B            12                             |
+|   OS      0 B           0 B            4                              |
+|                                                                       |
+| Warnings:                                                             |
+|   - GPU usage is low                                                  |
++-----------------------------------------------------------------------+

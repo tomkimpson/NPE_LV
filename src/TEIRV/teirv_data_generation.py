@@ -155,8 +155,9 @@ class TEIRVDataGenerator:
         
         self.total_simulations += n_samples
         
-        # Create progress bar for individual samples
-        pbar = tqdm(total=n_samples, desc="Generating TEIRV data", unit="samples")
+        # Create progress bar for batches
+        n_batches = (n_samples + batch_size - 1) // batch_size
+        pbar = tqdm(total=n_batches, desc="Generating TEIRV data", unit="batch")
         
         for i in range(0, n_samples, batch_size):
             current_batch_size = min(batch_size, n_samples - i)
@@ -164,16 +165,8 @@ class TEIRVDataGenerator:
             # Sample parameters
             theta_batch = self.prior.sample((current_batch_size,)).numpy()
             
-            # Set up initial conditions for batch
-            ic_batch = []
-            for j in range(current_batch_size):
-                ic = self.base_ic.copy()
-                ic['V'] = theta_batch[j, 5]  # Set V₀ from parameter
-                ic_batch.append(ic)
-            
-            # Simulate trajectories
+            # Simulate trajectories using batch function
             try:
-                # Use base initial conditions (V₀ will be set in simulate_teirv_batch)
                 trajectories = simulate_teirv_batch(
                     theta_batch=theta_batch,
                     initial_conditions=self.base_ic,
@@ -182,6 +175,7 @@ class TEIRVDataGenerator:
                 )
                 
                 # Process each trajectory
+                valid_count = 0
                 for j in range(current_batch_size):
                     trajectory = trajectories[j]
                     
@@ -203,18 +197,24 @@ class TEIRVDataGenerator:
                             
                         theta_list.append(theta_batch[j])
                         x_list.append(x)
-                        # Update progress bar for each valid sample
-                        pbar.update(1)
+                        valid_count += 1
                     else:
                         self.failed_simulations += 1
-                        # Still update progress for failed samples to show progress
-                        pbar.update(1)
+                
+                # Update progress bar
+                pbar.update(1)
+                pbar.set_postfix({
+                    'valid': f"{len(theta_list)}/{i+current_batch_size}",
+                    'batch_valid': f"{valid_count}/{current_batch_size}",
+                    'rate': f"{len(theta_list)/(i+current_batch_size):.1%}"
+                })
                         
             except Exception as e:
                 warnings.warn(f"Batch simulation failed: {e}")
                 self.failed_simulations += current_batch_size
                 # Update progress bar for failed batch
-                pbar.update(current_batch_size)
+                pbar.update(1)
+                pbar.set_postfix({'status': 'FAILED'})
         
         # Close progress bar
         pbar.close()

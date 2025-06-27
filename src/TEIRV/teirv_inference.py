@@ -68,6 +68,9 @@ class TEIRVInference:
             **neural_net_kwargs
         )
         
+        # Ensure all tensors are float32 by default
+        torch.set_default_dtype(torch.float32)
+        
         self.inference = SNPE(
             prior=self.prior,
             density_estimator=neural_posterior,
@@ -118,6 +121,10 @@ class TEIRVInference:
         print(f"Observation shape: {x.shape}")
         print(f"Observation type: {self.observation_type}")
         
+        # Ensure tensors are in float32 for SBI compatibility
+        theta = theta.float()
+        x = x.float()
+        
         # Add training data
         self.inference = self.inference.append_simulations(theta, x)
         
@@ -159,6 +166,9 @@ class TEIRVInference:
         """
         if self.posterior is None:
             raise RuntimeError("Must train model before sampling")
+        
+        # Ensure observations are in float32
+        x_obs = x_obs.float()
             
         return self.posterior.sample((num_samples,), x=x_obs, **kwargs)
     
@@ -211,8 +221,7 @@ class TEIRVInference:
             
         print(f"Saved TEIRV model to {filepath}")
     
-    @classmethod
-    def load_model(cls, filepath: str) -> 'TEIRVInference':
+    def load_model(self, filepath: str):
         """
         Load trained model.
         
@@ -220,20 +229,15 @@ class TEIRVInference:
         -----------
         filepath : str
             Model filepath
-            
-        Returns:
-        --------
-        inference_obj : TEIRVInference
-            Loaded inference object
         """
         with open(filepath, 'rb') as f:
             data = pickle.load(f)
             
-        obj = cls(observation_type=data['observation_type'])
-        obj.posterior = data['posterior']
-        obj.inference = data['inference']
+        self.observation_type = data['observation_type']
+        self.posterior = data['posterior']
+        self.inference = data['inference']
         
-        return obj
+        print(f"Loaded TEIRV model from {filepath}")
     
     def plot_posterior_samples(self, 
                               samples: torch.Tensor,

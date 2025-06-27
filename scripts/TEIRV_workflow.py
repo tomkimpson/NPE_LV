@@ -44,6 +44,9 @@ class TEIRVWorkflow:
         self.device = device
         self.workflow_dir = None
         
+        # Set consistent float32 precision throughout
+        torch.set_default_dtype(torch.float32)
+        
     def setup_workflow_directory(self, workflow_name: Optional[str] = None) -> Path:
         """Set up directory for workflow outputs."""
         if workflow_name is None:
@@ -272,7 +275,7 @@ class TEIRVWorkflow:
                 start_time = time.time()
                 posterior_samples = npe_model.sample_posterior(
                     observations.unsqueeze(0),
-                    n_samples=args.n_samples
+                    num_samples=args.n_samples
                 )
                 inference_time = time.time() - start_time
                 

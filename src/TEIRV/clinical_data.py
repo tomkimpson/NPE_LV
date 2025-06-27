@@ -27,7 +27,7 @@ class ClinicalDataLoader:
         """
         if data_directory is None:
             # Default to submodule location
-            self.data_dir = Path(__file__).parent.parent / "external/JSFGermano2024/TEIVR_Results/particle-filter-example-tiv_covid/data"
+            self.data_dir = Path(__file__).parent.parent.parent / "external/JSFGermano2024/TEIVR_Results/particle-filter-example-tiv_covid/data"
         else:
             self.data_dir = Path(data_directory)
             

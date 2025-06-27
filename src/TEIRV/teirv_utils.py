@@ -59,9 +59,9 @@ class TEIRVPrior(torch.distributions.Distribution):
         
         # Stack parameters: [β, π, δ, φ, ρ, V₀]
         if len(sample_shape) == 0:
-            return torch.stack([beta, pi, delta, phi, rho, v0])
+            return torch.stack([beta, pi, delta, phi, rho, v0]).float()
         else:
-            return torch.stack([beta, pi, delta, phi, rho, v0], dim=-1)
+            return torch.stack([beta, pi, delta, phi, rho, v0], dim=-1).float()
     
     def log_prob(self, value):
         """Compute log probability of parameter values."""
@@ -100,6 +100,36 @@ class TEIRVPrior(torch.distributions.Distribution):
             'rho': self.rho_bounds,
             'v0': (np.exp(self.lnv0_bounds[0]), np.exp(self.lnv0_bounds[1]))
         }
+    
+    @property
+    def mean(self):
+        """Return mean of the prior distribution."""
+        # Compute means for uniform distributions
+        beta_mean = (self.beta_bounds[0] + self.beta_bounds[1]) / 2
+        pi_mean = (self.pi_bounds[0] + self.pi_bounds[1]) / 2
+        delta_mean = (self.delta_bounds[0] + self.delta_bounds[1]) / 2
+        phi_mean = (self.phi_bounds[0] + self.phi_bounds[1]) / 2
+        rho_mean = (self.rho_bounds[0] + self.rho_bounds[1]) / 2
+        # For log-uniform V₀: mean of exp(U(a,b)) ≈ (exp(b) - exp(a))/(b - a)
+        lnv0_a, lnv0_b = self.lnv0_bounds
+        v0_mean = (np.exp(lnv0_b) - np.exp(lnv0_a)) / (lnv0_b - lnv0_a)
+        
+        return torch.tensor([beta_mean, pi_mean, delta_mean, phi_mean, rho_mean, v0_mean], dtype=torch.float32)
+    
+    @property
+    def stddev(self):
+        """Return standard deviation of the prior distribution."""
+        # Compute stddevs for uniform distributions: std = (b-a)/sqrt(12)
+        beta_std = (self.beta_bounds[1] - self.beta_bounds[0]) / np.sqrt(12)
+        pi_std = (self.pi_bounds[1] - self.pi_bounds[0]) / np.sqrt(12)
+        delta_std = (self.delta_bounds[1] - self.delta_bounds[0]) / np.sqrt(12)
+        phi_std = (self.phi_bounds[1] - self.phi_bounds[0]) / np.sqrt(12)
+        rho_std = (self.rho_bounds[1] - self.rho_bounds[0]) / np.sqrt(12)
+        # For log-uniform, use approximate std
+        lnv0_std = (self.lnv0_bounds[1] - self.lnv0_bounds[0]) / np.sqrt(12)
+        v0_std = np.exp(self.lnv0_bounds[1]) * lnv0_std  # Approximate
+        
+        return torch.tensor([beta_std, pi_std, delta_std, phi_std, rho_std, v0_std], dtype=torch.float32)
 
 
 def create_teirv_prior() -> TEIRVPrior:

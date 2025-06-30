@@ -5,7 +5,7 @@
 #SBATCH --error=outputs/logfiles/teirv_workflow_%j.err
 #SBATCH --export=ALL 
 #SBATCH --gres=gpu:1
-#SBATCH --time=4:00:00 
+#SBATCH --time=24:00:00 
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
 

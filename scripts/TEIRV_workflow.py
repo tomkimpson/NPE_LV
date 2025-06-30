@@ -33,7 +33,8 @@ sys.path.append(str(Path(__file__).parent.parent / 'src'))
 from TEIRV.teirv_data_generation import TEIRVDataGenerator
 from TEIRV.teirv_inference import TEIRVInference
 from TEIRV.clinical_data import ClinicalStudy, validate_clinical_data_compatibility
-from TEIRV.teirv_utils import create_teirv_prior, create_teirv_time_grid, teirv_parameter_summary
+from TEIRV.teirv_utils import create_teirv_prior, create_teirv_time_grid, teirv_parameter_summary, get_teirv_initial_conditions, apply_observation_model
+from TEIRV.teirv_simulator import gillespie_teirv
 
 
 class TEIRVWorkflow:
@@ -323,7 +324,7 @@ class TEIRVWorkflow:
         summary_df = pd.DataFrame(rows)
         summary_df.to_csv(output_path / 'clinical_parameter_estimates.csv', index=False)
         
-        # Save individual patient results
+        # Save individual patient results and create plots
         for patient_id, result in results.items():
             patient_dir = output_path / f'patient_{patient_id}'
             patient_dir.mkdir(exist_ok=True)
@@ -335,9 +336,199 @@ class TEIRVWorkflow:
             # Save parameter summary
             summary = result['parameter_summary']
             pd.DataFrame(summary).T.to_csv(patient_dir / 'parameter_summary.csv')
+            
+            # Create corner plot for this patient
+            print(f"Creating corner plot for patient {patient_id}")
+            try:
+                # Initialize a temporary inference object for plotting
+                temp_inference = TEIRVInference()
+                fig_corner = temp_inference.plot_corner(result['posterior_samples'])
+                fig_corner.savefig(patient_dir / f'patient_{patient_id}_corner.png', 
+                                 dpi=300, bbox_inches='tight')
+                plt.close(fig_corner)
+                print(f"  ✅ Corner plot saved")
+            except Exception as e:
+                print(f"  ❌ Corner plot failed: {e}")
+            
+            # Create predictive plot with credible intervals
+            print(f"Creating predictive plot for patient {patient_id}")
+            try:
+                fig_pred = self._create_predictive_plot(
+                    patient_id, result['posterior_samples'], result['observations']
+                )
+                fig_pred.savefig(patient_dir / f'patient_{patient_id}_predictive.png',
+                               dpi=300, bbox_inches='tight')
+                plt.close(fig_pred)
+                print(f"  ✅ Predictive plot saved")
+            except Exception as e:
+                print(f"  ❌ Predictive plot failed: {e}")
         
         # Create summary plots
         self._create_clinical_plots(results, output_path)
+    
+    def _create_predictive_plot(self, patient_id: str, posterior_samples: torch.Tensor, 
+                               observations: torch.Tensor, n_pred_samples: int = 20) -> plt.Figure:
+        """
+        Create predictive plot with credible intervals.
+        
+        Parameters:
+        -----------
+        patient_id : str
+            Patient identifier
+        posterior_samples : torch.Tensor
+            Posterior parameter samples
+        observations : torch.Tensor
+            Observed RT-PCR data
+        n_pred_samples : int
+            Number of posterior samples to use for predictions
+            
+        Returns:
+        --------
+        fig : matplotlib.figure.Figure
+            Predictive plot figure
+        """
+        print(f"  Generating {n_pred_samples} posterior predictions...")
+        
+        # Timing for progress estimation
+        import time
+        start_time = time.time()
+        first_sim_time = None
+        
+        # Time grids
+        t_obs = np.arange(0, 15, 1.0)  # Observed range: 0-14 days
+        t_pred = np.arange(0, 21, 1.0)  # Extended range: 0-20 days
+        
+        # Select subset of posterior samples
+        n_samples = min(n_pred_samples, len(posterior_samples))
+        sample_indices = np.random.choice(len(posterior_samples), n_samples, replace=False)
+        selected_samples = posterior_samples[sample_indices]
+        
+        # Generate predictions
+        predictions_obs = []  # For observed range
+        predictions_ext = []  # For extended range
+        
+        base_ic = get_teirv_initial_conditions()
+        
+        for i, theta_sample in enumerate(selected_samples):
+            sim_start = time.time()
+            
+            # Progress reporting
+            if i % 5 == 0 or i == 0:
+                print(f"    Processing sample {i+1}/{n_samples}...")
+            try:
+                # Set up initial conditions
+                ic = base_ic.copy()
+                ic['V'] = theta_sample[5].item()  # V₀ from posterior
+                
+                # Simulate for extended range
+                _, trajectory_ext = gillespie_teirv(
+                    theta=theta_sample.numpy(),
+                    initial_conditions=ic,
+                    t_max=20.0,
+                    t_grid=t_pred,
+                    max_steps=1000000
+                )
+                
+                # Apply observation model (RT-PCR transformation)
+                V_trajectory_ext = trajectory_ext[:, 4]  # V compartment
+                obs_ext = apply_observation_model(
+                    V_trajectory=V_trajectory_ext,
+                    sigma=1.0,  # Standard observation noise
+                    detection_limit=-0.65,
+                    add_noise=True
+                )
+                
+                # Extract observed range (first 15 points: 0-14 days)
+                obs_range = obs_ext[:15]
+                
+                predictions_obs.append(obs_range)
+                predictions_ext.append(obs_ext)
+                
+                # Time estimation after first simulation
+                if i == 0:
+                    first_sim_time = time.time() - sim_start
+                    estimated_total = first_sim_time * n_samples
+                    print(f"    Estimated total simulation time: {estimated_total:.1f}s ({estimated_total/60:.1f} min)")
+                
+            except Exception as e:
+                print(f"    Simulation {i} failed: {e}")
+                continue
+        
+        if len(predictions_obs) == 0:
+            print("  ❌ No successful predictions generated")
+            return plt.figure()
+        
+        # Convert to arrays and compute credible intervals
+        pred_obs_array = np.array(predictions_obs)  # Shape: (n_samples, 15)
+        pred_ext_array = np.array(predictions_ext)  # Shape: (n_samples, 21)
+        
+        # Compute quantiles
+        quantiles = [0.025, 0.125, 0.25, 0.5, 0.75, 0.875, 0.975]  # 0%, 25%, 50%, 75%, 95%
+        
+        # Observed range credible intervals
+        ci_obs = np.percentile(pred_obs_array, [2.5, 12.5, 25, 50, 75, 87.5, 97.5], axis=0)
+        
+        # Extended range credible intervals  
+        ci_ext = np.percentile(pred_ext_array, [2.5, 12.5, 25, 50, 75, 87.5, 97.5], axis=0)
+        
+        # Create plot
+        fig, ax = plt.subplots(figsize=(12, 8))
+        
+        # Plot observed data points
+        ax.scatter(t_obs, observations.numpy(), color='black', s=80, 
+                  label='Observed data', zorder=10, alpha=0.8)
+        
+        # Plot credible intervals for observed range (red)
+        # 95% CI
+        ax.fill_between(t_obs, ci_obs[0], ci_obs[6], alpha=0.2, color='red', 
+                       label='95% CI (observed)')
+        # 75% CI
+        ax.fill_between(t_obs, ci_obs[1], ci_obs[5], alpha=0.3, color='red')
+        # 50% CI  
+        ax.fill_between(t_obs, ci_obs[2], ci_obs[4], alpha=0.4, color='red')
+        # Median (observed range)
+        ax.plot(t_obs, ci_obs[3], color='darkred', linewidth=2, label='Median (observed)')
+        
+        # Plot credible intervals for extended range (purple) - connected to observed range
+        t_pred_ext = t_pred[14:]  # Start from day 14 to connect with observed range
+        ci_ext_pred = ci_ext[:, 14:]  # Start from day 14 to connect
+        
+        # 95% CI
+        ax.fill_between(t_pred_ext, ci_ext_pred[0], ci_ext_pred[6], alpha=0.2, color='purple',
+                       label='95% CI (predicted)')
+        # 75% CI
+        ax.fill_between(t_pred_ext, ci_ext_pred[1], ci_ext_pred[5], alpha=0.3, color='purple')
+        # 50% CI
+        ax.fill_between(t_pred_ext, ci_ext_pred[2], ci_ext_pred[4], alpha=0.4, color='purple')
+        # Median (predicted range) - connected to observed range
+        ax.plot(t_pred_ext, ci_ext_pred[3], color='darkviolet', linewidth=2, 
+               label='Median (predicted)')
+        
+        # Add vertical line at transition
+        ax.axvline(x=14, color='gray', linestyle='--', alpha=0.7, 
+                  label='Observed/Predicted boundary')
+        
+        # Formatting
+        ax.set_xlabel('Time (days)', fontsize=12)
+        ax.set_ylabel('log₁₀ Viral Load', fontsize=12)
+        ax.set_title(f'Patient {patient_id}: Posterior Predictive Check', fontsize=14)
+        ax.grid(True, alpha=0.3)
+        ax.legend(loc='upper right', fontsize=10)
+        
+        # Set reasonable y-limits for log10 viral load data
+        all_data = np.concatenate([observations.numpy(), ci_obs.flatten(), ci_ext.flatten()])
+        y_min = np.min(all_data) - 0.5  # Add some padding below
+        y_max = np.max(all_data) + 0.5  # Add some padding above
+        ax.set_ylim(y_min, y_max)
+        
+        # Add horizontal line for detection limit
+        ax.axhline(y=-0.65, color='gray', linestyle=':', alpha=0.7, 
+                  label='Detection limit')
+        
+        plt.tight_layout()
+        
+        print(f"  ✅ Generated predictions from {len(predictions_obs)} successful simulations")
+        return fig
     
     def _create_clinical_plots(self, results: Dict, output_path: Path):
         """Create clinical summary plots."""

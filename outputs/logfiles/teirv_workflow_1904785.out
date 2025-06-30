@@ -1,10 +1,10 @@
 ==========================================
 TEIRV NPE Full Workflow
 ==========================================
-Job ID: 1850289
-Node: gina1
-Start time: Fri Jun 27 15:50:23 AEST 2025
-Workflow name: production_run_20250627_155023
+Job ID: 1904785
+Node: gina304
+Start time: Mon Jun 30 15:12:25 AEST 2025
+Workflow name: production_run_20250630_151225
 Training samples: 50000
 Device: cuda
 Max epochs: 200
@@ -13,7 +13,7 @@ Checking CUDA availability...
 CUDA available: True
 CUDA devices: 1
 NVIDIA GPU info:
-Fri Jun 27 15:50:28 2025       
+Mon Jun 30 15:13:55 2025       
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
 |-----------------------------------------+------------------------+----------------------+
@@ -22,7 +22,7 @@ Fri Jun 27 15:50:28 2025
 |                                         |                        |               MIG M. |
 |=========================================+========================+======================|
 |   0  NVIDIA A100-SXM4-80GB          On  |   00000000:01:00.0 Off |                    0 |
-| N/A   27C    P0             60W /  500W |       0MiB /  81920MiB |      0%      Default |
+| N/A   32C    P0             67W /  500W |       0MiB /  81920MiB |      0%      Default |
 |                                         |                        |             Disabled |
 +-----------------------------------------+------------------------+----------------------+
                                                                                          
@@ -34,10 +34,10 @@ Fri Jun 27 15:50:28 2025
 |  No running processes found                                                             |
 +-----------------------------------------------------------------------------------------+
 ==========================================
-Starting TEIRV workflow at Fri Jun 27 15:50:29 AEST 2025
+Starting TEIRV workflow at Mon Jun 30 15:13:55 AEST 2025
 🚀 TEIRV NPE Complete Pipeline
 ==================================================
-📁 Workflow directory: workflows/production_run_20250627_155023
+📁 Workflow directory: workflows/production_run_20250630_151225
 📊 Training samples: 50000
 🔧 Device: cuda
 
@@ -50,7 +50,7 @@ Observation grid: 15 points at 1.0-day intervals
 Observation type: RT-PCR only
 RT-PCR noise: 1.0
 Detection limit: -0.65
-Output: workflows/production_run_20250627_155023/training_data.pkl
+Output: workflows/production_run_20250630_151225/training_data.pkl
 
 TEIRV Parameter Priors:
 ------------------------------
@@ -62,22 +62,3 @@ TEIRV Parameter Priors:
   V₀ (initial virions):     exp(Uniform(0.0, 5.0)) ≈ [1, 148]
 
 Starting data generation...
-
-+-------------------- Job Report: 1850289 (TIMEOUT) --------------------+
-| Memory (RAM)  [                    ]  2.7% (442.8 MB peak / 16 GB)    |
-| CPU           [####                ] 24.2% average                    |
-| GPU           [                    ]  0.1% average                    |
-| Time          [------------------->] 100.2% (0-04:00:25 / 0-04:00:00) |
-|                                                                       |
-| Lustre Filesystem:                                                    |
-|   Path    Total Read    Total Write    Total IOPS                     |
-|   ------  ------------  -------------  ------------                   |
-|   /fred   116 KB        65.2 KB        5.7 K                          |
-|   /home   0 B           0 B            6                              |
-|   OS      0 B           0 B            9                              |
-|                                                                       |
-| Warnings:                                                             |
-|   - Too much memory requested                                         |
-|   - CPU usage is low                                                  |
-|   - GPU usage is low                                                  |
-+-----------------------------------------------------------------------+

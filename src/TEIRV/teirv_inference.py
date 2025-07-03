@@ -40,7 +40,7 @@ class TEIRVInference:
         if seed is not None:
             torch.manual_seed(seed)
             
-        self.prior = create_teirv_prior()
+        self.prior = create_teirv_prior(device=device)
         self.inference = None
         self.posterior = None
         

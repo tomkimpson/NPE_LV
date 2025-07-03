@@ -62,3 +62,52 @@ TEIRV Parameter Priors:
   V₀ (initial virions):     exp(Uniform(0.0, 5.0)) ≈ [1, 148]
 
 Starting data generation...
+Generated 50000/50000 valid samples (0 failed)
+Saved TEIRV data to workflows/production_run_20250630_151225/training_data.pkl
+Data shapes: theta=torch.Size([50000, 6]), x=torch.Size([50000, 15])
+
+✅ DATA GENERATION COMPLETED
+⏱️  Generation time: 18970.0 seconds
+📊 Generated 50000 valid samples
+⚡ Generation rate: 2.6 samples/second
+
+🧠 Step 2: Training NPE model...
+🧠 TEIRV NPE Model Training
+==================================================
+Data: workflows/production_run_20250630_151225/training_data.pkl
+Output: workflows/production_run_20250630_151225/npe_model.pkl
+Device: cuda
+
+✅ Loaded 50000 training samples
+Parameter shape: torch.Size([50000, 6])
+Observation shape: torch.Size([50000, 15])
+Observation type: rt_pcr
+==========================================
+Workflow completed at Mon Jun 30 20:34:21 AEST 2025
+Exit code: 1
+❌ WORKFLOW FAILED with exit code 1
+Check the log files for details:
+  - Standard output: outputs/logfiles/teirv_workflow_1904785.out
+  - Standard error: outputs/logfiles/teirv_workflow_1904785.err
+==========================================
+
++------------------ Job Report: 1904785 (COMPLETED) -------------------+
+| Memory (RAM)  [                    ]  2.7% (443.8 MB peak / 16 GB)   |
+| CPU           [####                ] 23.9% average                   |
+| GPU           [                    ]  0.1% average                   |
+| Time          [---->               ] 22.4% (0-05:22:29 / 1-00:00:00) |
+|                                                                      |
+| Lustre Filesystem:                                                   |
+|   Path    Total Read    Total Write    Total IOPS                    |
+|   ------  ------------  -------------  ------------                  |
+|   /apps   0 B           0 B            8                             |
+|   /fred   542.4 MB      4.1 MB         21.5 K                        |
+|   /home   27.4 MB       0 B            12                            |
+|   OS      0 B           0 B            17                            |
+|                                                                      |
+| Warnings:                                                            |
+|   - Too much memory requested                                        |
+|   - CPU usage is low                                                 |
+|   - GPU usage is low                                                 |
+|   - Too much time requested                                          |
++----------------------------------------------------------------------+

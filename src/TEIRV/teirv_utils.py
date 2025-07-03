@@ -19,7 +19,9 @@ class TEIRVPrior(torch.distributions.Distribution):
     Inherits from torch.distributions.Distribution for SBI compatibility.
     """
     
-    def __init__(self):
+    def __init__(self, device: str = 'cpu'):
+        self.device = torch.device(device)
+        
         # Parameter bounds from original paper config file
         self.beta_bounds = (0.0, 20.0)        # β: infection rate
         self.pi_bounds = (200.0, 600.0)       # π: virion production
@@ -28,13 +30,19 @@ class TEIRVPrior(torch.distributions.Distribution):
         self.rho_bounds = (0.0, 1.0)          # ρ: reversion rate
         self.lnv0_bounds = (0.0, 5.0)         # ln(V₀): log initial virions
         
-        # Create individual distributions
-        self.beta_dist = Uniform(*self.beta_bounds)
-        self.pi_dist = Uniform(*self.pi_bounds)
-        self.delta_dist = Uniform(*self.delta_bounds)
-        self.phi_dist = Uniform(*self.phi_bounds)
-        self.rho_dist = Uniform(*self.rho_bounds)
-        self.lnv0_dist = Uniform(*self.lnv0_bounds)
+        # Create individual distributions on specified device
+        self.beta_dist = Uniform(torch.tensor(self.beta_bounds[0], device=self.device), 
+                                torch.tensor(self.beta_bounds[1], device=self.device))
+        self.pi_dist = Uniform(torch.tensor(self.pi_bounds[0], device=self.device), 
+                              torch.tensor(self.pi_bounds[1], device=self.device))
+        self.delta_dist = Uniform(torch.tensor(self.delta_bounds[0], device=self.device), 
+                                 torch.tensor(self.delta_bounds[1], device=self.device))
+        self.phi_dist = Uniform(torch.tensor(self.phi_bounds[0], device=self.device), 
+                               torch.tensor(self.phi_bounds[1], device=self.device))
+        self.rho_dist = Uniform(torch.tensor(self.rho_bounds[0], device=self.device), 
+                               torch.tensor(self.rho_bounds[1], device=self.device))
+        self.lnv0_dist = Uniform(torch.tensor(self.lnv0_bounds[0], device=self.device), 
+                                torch.tensor(self.lnv0_bounds[1], device=self.device))
         
         # Initialize parent Distribution class
         super().__init__(event_shape=torch.Size([6]), validate_args=False)
@@ -132,7 +140,7 @@ class TEIRVPrior(torch.distributions.Distribution):
         return torch.tensor([beta_std, pi_std, delta_std, phi_std, rho_std, v0_std], dtype=torch.float32)
 
 
-def create_teirv_prior() -> TEIRVPrior:
+def create_teirv_prior(device: str = 'cpu') -> TEIRVPrior:
     """
     Create prior distribution for TEIRV parameters.
     
@@ -164,7 +172,7 @@ def create_teirv_prior() -> TEIRVPrior:
     prior : TEIRVPrior
         Prior distribution over [β, π, δ, φ, ρ, V₀]
     """
-    return TEIRVPrior()
+    return TEIRVPrior(device=device)
 
 
 def get_teirv_initial_conditions(V0: float = 1e3) -> Dict[str, float]:

@@ -67,6 +67,12 @@ class TEIRVWorkflow:
         output_path = Path(args.output)
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
+        # Check if data already exists
+        if output_path.exists():
+            print(f"✅ Training data already exists: {output_path}")
+            print(f"⏭️  Skipping data generation...")
+            return str(output_path)
+        
         # Display configuration
         print(f"Samples: {args.n_samples}")
         print(f"Simulation timespan: [0, {args.t_max}] days")

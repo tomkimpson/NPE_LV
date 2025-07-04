@@ -1,0 +1,66 @@
+==========================================
+TEIRV NPE Inference Only
+==========================================
+Job ID: 1991943
+Node: gina1
+Start time: Fri Jul  4 10:00:30 AEST 2025
+Using existing model: workflows/production_run_20250703_123040/npe_model.pkl
+==========================================
+Checking CUDA availability...
+CUDA available: True
+CUDA devices: 1
+NVIDIA GPU info:
+Fri Jul  4 10:00:34 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:81:00.0 Off |                    0 |
+| N/A   32C    P0             62W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+==========================================
+Starting inference at Fri Jul  4 10:00:34 AEST 2025
+🏥 Running inference with existing model: workflows/production_run_20250703_123040/npe_model.pkl
+🏥 TEIRV Inference
+==================================================
+Loading NPE model from workflows/production_run_20250703_123040/npe_model.pkl
+Loaded TEIRV model from workflows/production_run_20250703_123040/npe_model.pkl
+✅ NPE model loaded successfully
+
+Loading clinical data...
+Found 6 patient datasets: ['443108', '445602', '444391', '444332', '432192', '451152']
+Loaded patient 443108: 14 timepoints
+Loaded patient 445602: 14 timepoints
+Loaded patient 444391: 14 timepoints
+Loaded patient 444332: 14 timepoints
+Loaded patient 432192: 14 timepoints
+Loaded patient 451152: 14 timepoints
+✅ Found 6 patients
+Filtered 6/6 patients meeting criteria
+✅ Processing 6 patients
+Prepared patient 443108: torch.Size([15])
+Prepared patient 445602: torch.Size([15])
+Prepared patient 444391: torch.Size([15])
+Prepared patient 444332: torch.Size([15])
+Prepared patient 432192: torch.Size([15])
+Prepared patient 451152: torch.Size([15])
+==========================================
+Inference completed at Fri Jul  4 10:00:42 AEST 2025
+Exit code: 1
+❌ INFERENCE FAILED with exit code 1
+Check the log files for details:
+  - Standard output: outputs/logfiles/teirv_inference_1991943.out
+  - Standard error: outputs/logfiles/teirv_inference_1991943.err
+==========================================

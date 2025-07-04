@@ -1,0 +1,16 @@
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]/fred/oz022/tkimpson/conda_envs/NPE_LV/lib/python3.11/site-packages/nflows/transforms/lu.py:80: UserWarning: torch.triangular_solve is deprecated in favor of torch.linalg.solve_triangularand will be removed in a future PyTorch release.
+torch.linalg.solve_triangular has its arguments reversed and does not return a copy of one of the inputs.
+X = torch.triangular_solve(B, A).solution
+should be replaced with
+X = torch.linalg.solve_triangular(A, B). (Triggered internally at ../aten/src/ATen/native/BatchLinearAlgebra.cpp:2190.)
+  outputs, _ = torch.triangular_solve(
+Drawing 20000 posterior samples:  50%|█████     | 10000/20000 [00:00<00:00, 35565.87it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 64863.10it/s]
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 374157.36it/s]
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 374938.34it/s]
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 376670.74it/s]
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 377768.23it/s]
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 389479.43it/s]
+
+real	9m56.672s
+user	9m36.813s
+sys	0m13.571s

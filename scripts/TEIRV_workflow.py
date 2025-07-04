@@ -232,7 +232,7 @@ class TEIRVWorkflow:
         # Load NPE model
         print(f"Loading NPE model from {args.model}")
         try:
-            npe_model = TEIRVInference()
+            npe_model = TEIRVInference(device=args.device)
             npe_model.load_model(args.model)
             print("✅ NPE model loaded successfully")
         except Exception as e:
@@ -286,10 +286,14 @@ class TEIRVWorkflow:
                 )
                 inference_time = time.time() - start_time
                 
+                # Move tensors to CPU for numpy operations
+                posterior_cpu = posterior_samples.squeeze(0).cpu()
+                observations_cpu = observations.cpu()
+                
                 results[patient_id] = {
-                    'posterior_samples': posterior_samples.squeeze(0),
-                    'observations': observations,
-                    'parameter_summary': teirv_parameter_summary(posterior_samples.squeeze(0)),
+                    'posterior_samples': posterior_cpu,
+                    'observations': observations_cpu,
+                    'parameter_summary': teirv_parameter_summary(posterior_cpu),
                     'inference_time': inference_time
                 }
                 

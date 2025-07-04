@@ -1,0 +1,164 @@
+==========================================
+TEIRV NPE Inference Only
+==========================================
+Job ID: 1992097
+Node: gina3
+Start time: Fri Jul  4 11:05:59 AEST 2025
+Using existing model: workflows/production_run_20250703_123040/npe_model.pkl
+==========================================
+Checking CUDA availability...
+CUDA available: True
+CUDA devices: 1
+NVIDIA GPU info:
+Fri Jul  4 11:06:02 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:41:00.0 Off |                    0 |
+| N/A   24C    P0             61W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+==========================================
+Starting inference at Fri Jul  4 11:06:02 AEST 2025
+🏥 Running inference with existing model: workflows/production_run_20250703_123040/npe_model.pkl
+🏥 TEIRV Inference
+==================================================
+Loading NPE model from workflows/production_run_20250703_123040/npe_model.pkl
+Loaded TEIRV model from workflows/production_run_20250703_123040/npe_model.pkl
+✅ NPE model loaded successfully
+
+Loading clinical data...
+Found 6 patient datasets: ['443108', '445602', '444391', '444332', '432192', '451152']
+Loaded patient 443108: 14 timepoints
+Loaded patient 445602: 14 timepoints
+Loaded patient 444391: 14 timepoints
+Loaded patient 444332: 14 timepoints
+Loaded patient 432192: 14 timepoints
+Loaded patient 451152: 14 timepoints
+✅ Found 6 patients
+Filtered 6/6 patients meeting criteria
+✅ Processing 6 patients
+Prepared patient 443108: torch.Size([15])
+Prepared patient 445602: torch.Size([15])
+Prepared patient 444391: torch.Size([15])
+Prepared patient 444332: torch.Size([15])
+Prepared patient 432192: torch.Size([15])
+Prepared patient 451152: torch.Size([15])
+
+Performing NPE inference (20000 samples per patient)...
+
+Processing patient 443108
+  ✅ Completed in 0.31s
+
+Processing patient 445602
+  ✅ Completed in 0.05s
+
+Processing patient 444391
+  ✅ Completed in 0.05s
+
+Processing patient 444332
+  ✅ Completed in 0.05s
+
+Processing patient 432192
+  ✅ Completed in 0.05s
+
+Processing patient 451152
+  ✅ Completed in 0.05s
+Creating corner plot for patient 443108
+  ✅ Corner plot saved
+Creating predictive plot for patient 443108
+  Generating 20 posterior predictions...
+    Processing sample 1/20...
+    Estimated total simulation time: 96.9s (1.6 min)
+    Processing sample 6/20...
+    Processing sample 11/20...
+    Processing sample 16/20...
+  ✅ Generated predictions from 20 successful simulations
+  ✅ Predictive plot saved
+Creating corner plot for patient 445602
+  ✅ Corner plot saved
+Creating predictive plot for patient 445602
+  Generating 20 posterior predictions...
+    Processing sample 1/20...
+    Estimated total simulation time: 89.5s (1.5 min)
+    Processing sample 6/20...
+    Processing sample 11/20...
+    Processing sample 16/20...
+  ✅ Generated predictions from 20 successful simulations
+  ✅ Predictive plot saved
+Creating corner plot for patient 444391
+  ✅ Corner plot saved
+Creating predictive plot for patient 444391
+  Generating 20 posterior predictions...
+    Processing sample 1/20...
+    Estimated total simulation time: 101.8s (1.7 min)
+    Processing sample 6/20...
+    Processing sample 11/20...
+    Processing sample 16/20...
+  ✅ Generated predictions from 20 successful simulations
+  ✅ Predictive plot saved
+Creating corner plot for patient 444332
+  ✅ Corner plot saved
+Creating predictive plot for patient 444332
+  Generating 20 posterior predictions...
+    Processing sample 1/20...
+    Estimated total simulation time: 100.8s (1.7 min)
+    Processing sample 6/20...
+    Processing sample 11/20...
+    Processing sample 16/20...
+  ✅ Generated predictions from 20 successful simulations
+  ✅ Predictive plot saved
+Creating corner plot for patient 432192
+  ✅ Corner plot saved
+Creating predictive plot for patient 432192
+  Generating 20 posterior predictions...
+    Processing sample 1/20...
+    Estimated total simulation time: 91.1s (1.5 min)
+    Processing sample 6/20...
+    Processing sample 11/20...
+    Processing sample 16/20...
+  ✅ Generated predictions from 20 successful simulations
+  ✅ Predictive plot saved
+Creating corner plot for patient 451152
+  ✅ Corner plot saved
+Creating predictive plot for patient 451152
+  Generating 20 posterior predictions...
+    Processing sample 1/20...
+    Estimated total simulation time: 89.4s (1.5 min)
+    Processing sample 6/20...
+    Processing sample 11/20...
+    Processing sample 16/20...
+  ✅ Generated predictions from 20 successful simulations
+  ✅ Predictive plot saved
+
+✅ CLINICAL INFERENCE COMPLETED
+⏱️  Total time: 0.63 seconds
+📁 Results saved to workflows/production_run_20250703_123040/inference_results
+✅ Inference completed! Results in: workflows/production_run_20250703_123040/inference_results
+==========================================
+Inference completed at Fri Jul  4 11:15:59 AEST 2025
+Exit code: 0
+✅ INFERENCE COMPLETED SUCCESSFULLY
+📁 Results available in: workflows/production_run_20250703_123040/inference_results/
+
+Generated files:
+  - Patient-specific corner plots: patient_*_corner.png
+  - Patient-specific predictive plots: patient_*_predictive.png
+  - Parameter estimates: clinical_parameter_estimates.csv
+
+To view results:
+  ls -la workflows/production_run_20250703_123040/inference_results/
+  cat workflows/production_run_20250703_123040/inference_results/clinical_parameter_estimates.csv
+==========================================

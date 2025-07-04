@@ -167,8 +167,8 @@ class TEIRVInference:
         if self.posterior is None:
             raise RuntimeError("Must train model before sampling")
         
-        # Ensure observations are in float32
-        x_obs = x_obs.float()
+        # Ensure observations are in float32 and on correct device
+        x_obs = x_obs.float().to(self.device)
             
         return self.posterior.sample((num_samples,), x=x_obs, **kwargs)
     
@@ -236,6 +236,12 @@ class TEIRVInference:
         self.observation_type = data['observation_type']
         self.posterior = data['posterior']
         self.inference = data['inference']
+        
+        # Ensure posterior is on the correct device
+        if hasattr(self.posterior, '_device'):
+            self.posterior._device = self.device
+        if hasattr(self.posterior, 'net'):
+            self.posterior.net = self.posterior.net.to(self.device)
         
         print(f"Loaded TEIRV model from {filepath}")
     

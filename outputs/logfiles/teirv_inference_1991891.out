@@ -1,0 +1,51 @@
+==========================================
+TEIRV NPE Inference Only
+==========================================
+Job ID: 1991891
+Node: gina1
+Start time: Fri Jul  4 09:43:01 AEST 2025
+Using existing model: workflows/production_run_20250703_123040/npe_model.pkl
+==========================================
+Checking CUDA availability...
+CUDA available: True
+CUDA devices: 1
+NVIDIA GPU info:
+Fri Jul  4 09:43:05 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:81:00.0 Off |                    0 |
+| N/A   32C    P0             59W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+==========================================
+Starting inference at Fri Jul  4 09:43:05 AEST 2025
+🏥 Running inference with existing model: workflows/production_run_20250703_123040/npe_model.pkl
+🏥 TEIRV Inference
+==================================================
+Loading NPE model from workflows/production_run_20250703_123040/npe_model.pkl
+Loaded TEIRV model from workflows/production_run_20250703_123040/npe_model.pkl
+✅ NPE model loaded successfully
+
+Loading clinical data...
+❌ Error loading clinical data: 'Namespace' object has no attribute 'data_dir'
+==========================================
+Inference completed at Fri Jul  4 09:43:12 AEST 2025
+Exit code: 1
+❌ INFERENCE FAILED with exit code 1
+Check the log files for details:
+  - Standard output: outputs/logfiles/teirv_inference_1991891.out
+  - Standard error: outputs/logfiles/teirv_inference_1991891.err
+==========================================

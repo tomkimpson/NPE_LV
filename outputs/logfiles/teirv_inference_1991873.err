@@ -1,0 +1,11 @@
+Traceback (most recent call last):
+  File "/fred/oz022/tkimpson/NPE_LV/run_inference_only.py", line 41, in <module>
+    main()
+  File "/fred/oz022/tkimpson/NPE_LV/run_inference_only.py", line 36, in main
+    workflow.run_inference(args)
+    ^^^^^^^^^^^^^^^^^^^^^^
+AttributeError: 'TEIRVWorkflow' object has no attribute 'run_inference'. Did you mean: 'inference'?
+
+real	4m5.024s
+user	0m4.416s
+sys	0m3.800s

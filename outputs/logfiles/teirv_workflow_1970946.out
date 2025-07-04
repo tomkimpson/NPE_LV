@@ -1,0 +1,170 @@
+==========================================
+TEIRV NPE Full Workflow
+==========================================
+Job ID: 1970946
+Node: gina1
+Start time: Thu Jul  3 12:30:40 AEST 2025
+Workflow name: production_run_20250703_123040
+Training samples: 50000
+Device: cuda
+Max epochs: 200
+==========================================
+Checking CUDA availability...
+CUDA available: True
+CUDA devices: 1
+NVIDIA GPU info:
+Thu Jul  3 12:32:08 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:01:00.0 Off |                    0 |
+| N/A   26C    P0             63W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+==========================================
+Starting TEIRV workflow at Thu Jul  3 12:32:08 AEST 2025
+🚀 TEIRV NPE Complete Pipeline
+==================================================
+📁 Workflow directory: workflows/production_run_20250703_123040
+📊 Training samples: 50000
+🔧 Device: cuda
+
+🔬 Step 1: Generating training data...
+🔬 TEIRV Training Data Generation
+==================================================
+Samples: 50000
+Simulation timespan: [0, 14.0] days
+Observation grid: 15 points at 1.0-day intervals
+Observation type: RT-PCR only
+RT-PCR noise: 1.0
+Detection limit: -0.65
+Output: workflows/production_run_20250703_123040/training_data.pkl
+
+TEIRV Parameter Priors:
+------------------------------
+  β (infection rate):       Uniform(0.0, 20.0)
+  π (virion production):    Uniform(200.0, 600.0)
+  δ (cell clearance):       Uniform(1.0, 11.0)
+  φ (interferon protection): Uniform(0.0, 15.0)
+  ρ (reversion rate):       Uniform(0.0, 1.0)
+  V₀ (initial virions):     exp(Uniform(0.0, 5.0)) ≈ [1, 148]
+
+Starting data generation...
+Generated 50000/50000 valid samples (0 failed)
+Saved TEIRV data to workflows/production_run_20250703_123040/training_data.pkl
+Data shapes: theta=torch.Size([50000, 6]), x=torch.Size([50000, 15])
+
+✅ DATA GENERATION COMPLETED
+⏱️  Generation time: 18858.1 seconds
+📊 Generated 50000 valid samples
+⚡ Generation rate: 2.7 samples/second
+
+🧠 Step 2: Training NPE model...
+🧠 TEIRV NPE Model Training
+==================================================
+Data: workflows/production_run_20250703_123040/training_data.pkl
+Output: workflows/production_run_20250703_123040/npe_model.pkl
+Device: cuda
+
+✅ Loaded 50000 training samples
+Parameter shape: torch.Size([50000, 6])
+Observation shape: torch.Size([50000, 15])
+Observation type: rt_pcr
+Starting training...
+Training TEIRV NPE with 50000 samples...
+Parameter shape: torch.Size([50000, 6])
+Observation shape: torch.Size([50000, 15])
+Observation type: rt_pcr
+ Training neural network. Epochs trained: 1 Training neural network. Epochs trained: 2 Training neural network. Epochs trained: 3 Training neural network. Epochs trained: 4 Training neural network. Epochs trained: 5 Training neural network. Epochs trained: 6 Training neural network. Epochs trained: 7 Training neural network. Epochs trained: 8 Training neural network. Epochs trained: 9 Training neural network. Epochs trained: 10 Training neural network. Epochs trained: 11 Training neural network. Epochs trained: 12 Training neural network. Epochs trained: 13 Training neural network. Epochs trained: 14 Training neural network. Epochs trained: 15 Training neural network. Epochs trained: 16 Training neural network. Epochs trained: 17 Training neural network. Epochs trained: 18 Training neural network. Epochs trained: 19 Training neural network. Epochs trained: 20 Training neural network. Epochs trained: 21 Training neural network. Epochs trained: 22 Training neural network. Epochs trained: 23 Training neural network. Epochs trained: 24 Training neural network. Epochs trained: 25 Training neural network. Epochs trained: 26 Training neural network. Epochs trained: 27 Training neural network. Epochs trained: 28 Training neural network. Epochs trained: 29 Training neural network. Epochs trained: 30 Training neural network. Epochs trained: 31 Training neural network. Epochs trained: 32 Training neural network. Epochs trained: 33 Training neural network. Epochs trained: 34 Training neural network. Epochs trained: 35 Training neural network. Epochs trained: 36 Training neural network. Epochs trained: 37 Training neural network. Epochs trained: 38 Neural network successfully converged after 38 epochs.
+        -------------------------
+        ||||| ROUND 1 STATS |||||:
+        -------------------------
+        Epochs trained: 38
+        Best validation performance: 17.2066
+        -------------------------
+        
+Saved TEIRV model to workflows/production_run_20250703_123040/npe_model.pkl
+
+✅ TRAINING COMPLETED
+⏱️  Training time: 404.7 seconds
+📁 Model saved to workflows/production_run_20250703_123040/npe_model.pkl
+
+🏥 Step 3: Running inference...
+🏥 TEIRV Inference
+==================================================
+Loading NPE model from workflows/production_run_20250703_123040/npe_model.pkl
+Loaded TEIRV model from workflows/production_run_20250703_123040/npe_model.pkl
+✅ NPE model loaded successfully
+
+Loading clinical data...
+Found 6 patient datasets: ['443108', '445602', '444391', '444332', '432192', '451152']
+Loaded patient 443108: 14 timepoints
+Loaded patient 445602: 14 timepoints
+Loaded patient 444391: 14 timepoints
+Loaded patient 444332: 14 timepoints
+Loaded patient 432192: 14 timepoints
+Loaded patient 451152: 14 timepoints
+✅ Found 6 patients
+Filtered 6/6 patients meeting criteria
+✅ Processing 6 patients
+Prepared patient 443108: torch.Size([15])
+Prepared patient 445602: torch.Size([15])
+Prepared patient 444391: torch.Size([15])
+Prepared patient 444332: torch.Size([15])
+Prepared patient 432192: torch.Size([15])
+Prepared patient 451152: torch.Size([15])
+
+Performing NPE inference (20000 samples per patient)...
+
+Processing patient 443108
+  ❌ Failed: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!
+
+Processing patient 445602
+  ❌ Failed: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!
+
+Processing patient 444391
+  ❌ Failed: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!
+
+Processing patient 444332
+  ❌ Failed: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!
+
+Processing patient 432192
+  ❌ Failed: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!
+
+Processing patient 451152
+  ❌ Failed: Expected all tensors to be on the same device, but found at least two devices, cuda:0 and cpu!
+
+✅ CLINICAL INFERENCE COMPLETED
+⏱️  Total time: 4.19 seconds
+📁 Results saved to workflows/production_run_20250703_123040/inference_results
+
+🎉 COMPLETE PIPELINE FINISHED
+⏱️  Total time: 19275.9 seconds (321.3 minutes)
+📁 All results in: workflows/production_run_20250703_123040
+==========================================
+Workflow completed at Thu Jul  3 17:57:30 AEST 2025
+Exit code: 0
+✅ WORKFLOW COMPLETED SUCCESSFULLY
+📁 Results available in: workflows/production_run_20250703_123040
+
+Generated files:
+  - workflows/production_run_20250703_123040/training_data.pkl
+  - workflows/production_run_20250703_123040/npe_model.pkl
+  - workflows/production_run_20250703_123040/inference_results/
+
+To view results:
+  ls -la workflows/production_run_20250703_123040/
+  cat workflows/production_run_20250703_123040/inference_results/clinical_parameter_estimates.csv
+==========================================

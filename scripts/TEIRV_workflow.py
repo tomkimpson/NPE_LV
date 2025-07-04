@@ -262,7 +262,8 @@ class TEIRVWorkflow:
             sys.exit(1)
         
         # Prepare data for inference
-        time_grid = create_teirv_time_grid(14.0, 1.0)
+        # Use 10-day time grid to match training data
+        time_grid = create_teirv_time_grid(10.0, 1.0)
         patient_data = study.prepare_for_inference(good_patients, time_grid)
         
         # Perform inference
@@ -405,8 +406,8 @@ class TEIRVWorkflow:
         first_sim_time = None
         
         # Time grids
-        t_obs = np.arange(0, 15, 1.0)  # Observed range: 0-14 days
-        t_pred = np.arange(0, 21, 1.0)  # Extended range: 0-20 days
+        t_obs = np.arange(0, 11, 1.0)  # Observed range: 0-10 days (training data)
+        t_pred = np.arange(0, 21, 1.0)  # Extended range: 0-20 days (prediction)
         
         # Select subset of posterior samples
         n_samples = min(n_pred_samples, len(posterior_samples))
@@ -448,8 +449,8 @@ class TEIRVWorkflow:
                     add_noise=True
                 )
                 
-                # Extract observed range (first 15 points: 0-14 days)
-                obs_range = obs_ext[:15]
+                # Extract observed range (first 11 points: 0-10 days)
+                obs_range = obs_ext[:11]
                 
                 predictions_obs.append(obs_range)
                 predictions_ext.append(obs_ext)
@@ -469,7 +470,7 @@ class TEIRVWorkflow:
             return plt.figure()
         
         # Convert to arrays and compute credible intervals
-        pred_obs_array = np.array(predictions_obs)  # Shape: (n_samples, 15)
+        pred_obs_array = np.array(predictions_obs)  # Shape: (n_samples, 11)
         pred_ext_array = np.array(predictions_ext)  # Shape: (n_samples, 21)
         
         # Compute quantiles
@@ -500,8 +501,8 @@ class TEIRVWorkflow:
         ax.plot(t_obs, ci_obs[3], color='darkred', linewidth=2, label='Median (observed)')
         
         # Plot credible intervals for extended range (purple) - connected to observed range
-        t_pred_ext = t_pred[14:]  # Start from day 14 to connect with observed range
-        ci_ext_pred = ci_ext[:, 14:]  # Start from day 14 to connect
+        t_pred_ext = t_pred[10:]  # Start from day 10 to connect with observed range
+        ci_ext_pred = ci_ext[:, 10:]  # Start from day 10 to connect
         
         # 95% CI
         ax.fill_between(t_pred_ext, ci_ext_pred[0], ci_ext_pred[6], alpha=0.2, color='purple',
@@ -515,8 +516,8 @@ class TEIRVWorkflow:
                label='Median (predicted)')
         
         # Add vertical line at transition
-        ax.axvline(x=14, color='gray', linestyle='--', alpha=0.7, 
-                  label='Observed/Predicted boundary')
+        ax.axvline(x=10, color='gray', linestyle='--', alpha=0.7, 
+                  label='Training/Prediction boundary')
         
         # Formatting
         ax.set_xlabel('Time (days)', fontsize=12)
@@ -601,7 +602,7 @@ class TEIRVWorkflow:
             output=str(demo_dir / "demo_data.pkl"),
             batch_size=500,
             seed=42,
-            t_max=14.0,
+            t_max=10.0,
             dt=1.0,
             observation_noise=1.0,
             detection_limit=-0.65,
@@ -748,7 +749,7 @@ Examples:
     gen_parser.add_argument('--n_samples', type=int, default=10000, help='Number of samples')
     gen_parser.add_argument('--output', type=str, default='data/teirv_training_data.pkl', help='Output filepath')
     gen_parser.add_argument('--batch_size', type=int, default=1000, help='Batch size')
-    gen_parser.add_argument('--t_max', type=float, default=14.0, help='Max simulation time (days)')
+    gen_parser.add_argument('--t_max', type=float, default=10.0, help='Max simulation time (days)')
     gen_parser.add_argument('--dt', type=float, default=1.0, help='Time step (days)')
     gen_parser.add_argument('--observation_noise', type=float, default=1.0, help='RT-PCR noise')
     gen_parser.add_argument('--detection_limit', type=float, default=-0.65, help='Detection limit')
@@ -760,9 +761,9 @@ Examples:
     train_parser.add_argument('--output', type=str, default='models/teirv_npe_model.pkl', help='Output model path')
     train_parser.add_argument('--batch_size', type=int, default=512, help='Training batch size')
     train_parser.add_argument('--learning_rate', type=float, default=5e-4, help='Learning rate')
-    train_parser.add_argument('--max_epochs', type=int, default=150, help='Max epochs')
+    train_parser.add_argument('--max_epochs', type=int, default=500, help='Max epochs')
     train_parser.add_argument('--validation_fraction', type=float, default=0.15, help='Validation fraction')
-    train_parser.add_argument('--early_stopping', type=int, default=25, help='Early stopping patience')
+    train_parser.add_argument('--early_stopping', type=int, default=50, help='Early stopping patience')
     train_parser.add_argument('--hidden_features', type=int, default=256, help='Hidden layer size')
     train_parser.add_argument('--num_transforms', type=int, default=8, help='Number of transforms')
     
@@ -782,19 +783,19 @@ Examples:
     # Full pipeline mode
     full_parser = subparsers.add_parser('full', help='Complete pipeline')
     full_parser.add_argument('--workflow_name', type=str, default=None, help='Workflow name')
-    full_parser.add_argument('--n_samples', type=int, default=10000, help='Training samples')
+    full_parser.add_argument('--n_samples', type=int, default=100000, help='Training samples')
     full_parser.add_argument('--batch_size', type=int, default=1000, help='Data generation batch size')
     full_parser.add_argument('--train_batch_size', type=int, default=512, help='Training batch size')
     full_parser.add_argument('--inference_samples', type=int, default=10000, help='Inference samples')
-    full_parser.add_argument('--t_max', type=float, default=14.0, help='Max time (days)')
+    full_parser.add_argument('--t_max', type=float, default=10.0, help='Max time (days)')
     full_parser.add_argument('--dt', type=float, default=1.0, help='Time step (days)')
     full_parser.add_argument('--observation_noise', type=float, default=1.0, help='RT-PCR noise')
     full_parser.add_argument('--detection_limit', type=float, default=-0.65, help='Detection limit')
     full_parser.add_argument('--full_trajectory', action='store_true', help='Use full trajectory')
     full_parser.add_argument('--learning_rate', type=float, default=5e-4, help='Learning rate')
-    full_parser.add_argument('--max_epochs', type=int, default=150, help='Max epochs')
+    full_parser.add_argument('--max_epochs', type=int, default=500, help='Max epochs')
     full_parser.add_argument('--validation_fraction', type=float, default=0.15, help='Validation fraction')
-    full_parser.add_argument('--early_stopping', type=int, default=25, help='Early stopping')
+    full_parser.add_argument('--early_stopping', type=int, default=50, help='Early stopping')
     full_parser.add_argument('--hidden_features', type=int, default=256, help='Hidden features')
     full_parser.add_argument('--num_transforms', type=int, default=8, help='Number of transforms')
     full_parser.add_argument('--min_detections', type=int, default=5, help='Min detections')

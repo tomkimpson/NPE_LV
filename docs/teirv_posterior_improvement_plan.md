@@ -2,7 +2,7 @@
 
 **Date Created:** July 4, 2025  
 **Branch:** teirv-implementation  
-**Status:** Planning Phase
+**Status:** Phase 2 - Training Optimization
 
 ## Problem Statement
 
@@ -136,20 +136,20 @@ Compared our implementation with `external/JSFGermano2024/TEIVR_Results/` and co
 
 ## File Modifications Checklist
 
-### Primary Files to Modify:
-- [ ] `src/TEIRV/teirv_data_generation.py`
-  - [ ] Change default `t_max` from 14.0 to 10.0
-  - [ ] Update time grid creation
-  - [ ] Modify observation model application
+### Phase 1 Files (COMPLETED ✅):
+- [x] `src/TEIRV/teirv_data_generation.py`
+  - [x] Change default `t_max` from 14.0 to 10.0
+  - [x] Update time grid creation
+  - [x] Modify observation model application
 
-- [ ] `scripts/TEIRV_workflow.py`
-  - [ ] Update workflow default parameters
-  - [ ] Modify predictive plot time ranges (lines 379-541)
-  - [ ] Add training diagnostics
+- [x] `scripts/TEIRV_workflow.py`
+  - [x] Update workflow default parameters
+  - [x] Modify predictive plot time ranges (lines 379-541)
+  - [ ] Add training diagnostics *(Phase 2)*
 
-- [ ] `scripts/slurm_scripts/run_teirv_workflow.sh`
-  - [ ] Update SLURM parameters for new training requirements
-  - [ ] Adjust time limits and resource allocation
+- [x] `scripts/slurm_scripts/run_teirv_workflow.sh`
+  - [x] Update SLURM parameters for new training requirements
+  - [x] Adjust time limits and resource allocation
 
 ### Secondary Files:
 - [ ] `src/TEIRV/teirv_inference.py`
@@ -167,24 +167,101 @@ Compared our implementation with `external/JSFGermano2024/TEIVR_Results/` and co
 - ✅ Verified implementation against original paper  
 - ✅ Identified root cause: training timespan mismatch
 - ✅ Created improvement plan with phased approach
-- 📝 Next: Begin Phase 1 implementation
+- ✅ **Phase 1 Implementation COMPLETED**
 
-### Future Updates
-*This section will be updated as implementation progresses*
+### July 4, 2025 - Phase 1 Implementation ✅
+**Core Training Data Fix - COMPLETED**
+
+#### Changes Made:
+1. ✅ **Modified data generation timespan**
+   - Changed default `t_max` from 14.0 → 10.0 days in `src/TEIRV/teirv_data_generation.py:21`
+   - Updated time grid utility in `src/TEIRV/teirv_utils.py:223`
+   - Training data now uses 11 points (0-10 days) instead of 15 points (0-14 days)
+
+2. ✅ **Updated workflow parameters**
+   - Modified workflow defaults in `scripts/TEIRV_workflow.py:751,789`
+   - Updated demo configuration (line 604)
+   - Changed clinical inference to use 10-day time grid (line 266)
+
+3. ✅ **Transformed predictive plotting**
+   - Modified time grids: `t_obs` = 0-10 days, `t_pred` = 0-20 days (line 409-410)
+   - Updated array dimensions and boundary transition (line 453, 504-505)
+   - Changed transition marker from day 14 → day 10 (line 519)
+   - Updated labels to "Training/Prediction boundary"
+
+4. ✅ **Updated SLURM configuration**
+   - Added descriptive comments about 10-day training in `scripts/slurm_scripts/run_teirv_workflow.sh`
+   - Clarified workflow description for 10-20 day predictions
+
+#### Expected Impact:
+- **Training focus**: Model now learns early infection dynamics (0-10 days)
+- **True prediction**: Days 10-20 represent genuine out-of-sample forecasting
+- **Better identifiability**: Critical growth phase should provide more informative likelihood
+- **Posterior concentration**: Expected narrower, more peaked parameter distributions
+
+### July 4, 2025 - Phase 2 Implementation 📈
+**Training Optimization - IN PROGRESS**
+
+#### Rationale:
+Phase 1 changes (10-day training) are relatively minor. The **core issue** is likely insufficient training:
+- Only **38 epochs** with early stopping (validation loss 17.2066)
+- Limited training duration may prevent posterior concentration
+- Need longer training + better hyperparameters for complex 6-parameter problem
+
+#### Phase 2 Priority Tasks:
+1. **🎯 Extend training duration** (200 → 500 epochs)
+2. **⚡ Improve early stopping criteria** (more patience for convergence)
+3. **📊 Add training diagnostics** (loss monitoring, posterior quality tracking)
+4. **🔧 Optimize hyperparameters** (learning rate, network architecture)
+5. **📈 Increase training data** (50k → 100k samples if needed)
+
+#### Changes Made:
+1. ✅ **Extended training duration**
+   - Increased `max_epochs` from 150/200 → 500 in `src/TEIRV/teirv_inference.py:86`
+   - Extended early stopping patience from 25 → 50 epochs
+   - Updated workflow and SLURM defaults to match
+
+2. ✅ **Enhanced training diagnostics**
+   - Added detailed training configuration reporting (lines 132-137)
+   - Added final training results summary (lines 155-158)
+   - Created `assess_posterior_quality()` method for quality monitoring
+
+3. ✅ **Increased training data**
+   - Raised default training samples from 50k → 100k
+   - Updated SLURM script: `N_SAMPLES=100000`
+   - Updated workflow default: `n_samples=100000`
+
+4. 🔄 **Network architecture optimization** (pending)
+   - Consider larger hidden features if needed
+   - Test learning rate scheduling
+   - Experiment with different network architectures
+
+#### Expected Impact:
+- **500 epochs** should allow much better convergence than previous 38 epochs
+- **100k samples** provides more diverse training data for complex 6-parameter space
+- **Enhanced monitoring** will show us exactly how training progresses
+- **Increased patience** prevents premature stopping on complex problems
+
+#### Next Actions:
+- Test new configuration with extended training
+- Monitor training curves and convergence behavior
+- Compare posterior concentration against 38-epoch baseline
+- Adjust network architecture if validation loss plateaus
 
 ---
 
 ## Technical Notes
 
-### Current Training Configuration
+### Current Training Configuration (Phase 2 Optimized)
 ```bash
 # From run_teirv_workflow.sh
-N_SAMPLES=50000
-MAX_EPOCHS=200
-HIDDEN_FEATURES=256
-NUM_TRANSFORMS=8
-TRAIN_BATCH_SIZE=512
-LEARNING_RATE=5e-4
+N_SAMPLES=100000             # Doubled training data
+MAX_EPOCHS=500               # Extended for better convergence  
+EARLY_STOPPING=50            # Increased patience
+HIDDEN_FEATURES=256          # Network architecture
+NUM_TRANSFORMS=8             # Normalizing flow complexity
+TRAIN_BATCH_SIZE=512         # Training batch size
+LEARNING_RATE=5e-4           # Learning rate
 ```
 
 ### Recent Successful Run (Job 1992097)

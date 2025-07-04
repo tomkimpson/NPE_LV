@@ -18,7 +18,7 @@ class TEIRVDataGenerator:
     """Data generator for TEIRV NPE training."""
     
     def __init__(self, 
-                 t_max: float = 14.0,
+                 t_max: float = 10.0,
                  dt: float = 1.0,
                  observation_noise: float = 1.0,
                  detection_limit: float = -0.65,

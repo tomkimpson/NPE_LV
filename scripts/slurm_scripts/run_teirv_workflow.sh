@@ -12,19 +12,20 @@
 # TEIRV NPE Full Workflow SLURM Script
 # 
 # This script runs the complete TEIRV NPE pipeline:
-# 1. Generate training data (50,000 samples)
+# 1. Generate training data (50,000 samples, 10-day trajectories)
 # 2. Train NPE model on GPU
-# 3. Run inference on clinical patient data
+# 3. Run inference on clinical patient data with 10-20 day predictions
 #
 # Usage: sbatch scripts/slurm_scripts/run_teirv_workflow.sh
 #
 # Modify the parameters below as needed:
 
 # Workflow parameters
-N_SAMPLES=50000              # Training samples to generate
+N_SAMPLES=100000             # Increased training samples for better convergence
 WORKFLOW_NAME="production_run_$(date +%Y%m%d_%H%M%S)"
 DEVICE="cuda"                # Use GPU for training
-MAX_EPOCHS=200               # Training epochs
+# NOTE: Uses t_max=10.0 days by default (training on early infection dynamics)
+MAX_EPOCHS=500               # Extended training epochs for better convergence
 HIDDEN_FEATURES=256          # Neural network size
 NUM_TRANSFORMS=8             # Normalizing flow complexity
 

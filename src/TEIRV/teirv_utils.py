@@ -220,11 +220,11 @@ def get_teirv_fixed_parameters() -> Dict[str, float]:
     }
 
 
-def create_teirv_time_grid(t_max: float = 14.0, dt: float = 1.0) -> np.ndarray:
+def create_teirv_time_grid(t_max: float = 10.0, dt: float = 1.0) -> np.ndarray:
     """
-    Create time grid for TEIRV simulation matching clinical data.
+    Create time grid for TEIRV simulation matching training data.
     
-    Clinical data has 14 daily measurements.
+    Training data uses 10 daily measurements for early infection dynamics.
     
     Parameters:
     -----------

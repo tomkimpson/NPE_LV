@@ -685,7 +685,7 @@ Examples:
     
     # Generate mode
     gen_parser = subparsers.add_parser('generate', help='Generate training data')
-    gen_parser.add_argument('--n_samples', type=int, default=10000, help='Number of samples')
+    gen_parser.add_argument('--n_samples', type=int, default=200000, help='Number of samples')
     gen_parser.add_argument('--output', type=str, default='data/teirv_training_data.pkl', help='Output filepath')
     gen_parser.add_argument('--batch_size', type=int, default=1000, help='Batch size')
     gen_parser.add_argument('--t_max', type=float, default=10.0, help='Max simulation time (days)')
@@ -700,11 +700,11 @@ Examples:
     train_parser.add_argument('--output', type=str, default='models/teirv_npe_model.pkl', help='Output model path')
     train_parser.add_argument('--batch_size', type=int, default=512, help='Training batch size')
     train_parser.add_argument('--learning_rate', type=float, default=5e-4, help='Learning rate')
-    train_parser.add_argument('--max_epochs', type=int, default=500, help='Max epochs')
+    train_parser.add_argument('--max_epochs', type=int, default=1000, help='Max epochs')
     train_parser.add_argument('--validation_fraction', type=float, default=0.15, help='Validation fraction')
-    train_parser.add_argument('--early_stopping', type=int, default=50, help='Early stopping patience')
-    train_parser.add_argument('--hidden_features', type=int, default=256, help='Hidden layer size')
-    train_parser.add_argument('--num_transforms', type=int, default=8, help='Number of transforms')
+    train_parser.add_argument('--early_stopping', type=int, default=100, help='Early stopping patience')
+    train_parser.add_argument('--hidden_features', type=int, default=512, help='Hidden layer size')
+    train_parser.add_argument('--num_transforms', type=int, default=12, help='Number of transforms')
     
     # Inference mode
     inference_parser = subparsers.add_parser('inference', help='Run inference on patient data')
@@ -722,7 +722,7 @@ Examples:
     # Full pipeline mode
     full_parser = subparsers.add_parser('full', help='Complete pipeline')
     full_parser.add_argument('--workflow_name', type=str, default=None, help='Workflow name')
-    full_parser.add_argument('--n_samples', type=int, default=100000, help='Training samples')
+    full_parser.add_argument('--n_samples', type=int, default=200000, help='Training samples')
     full_parser.add_argument('--batch_size', type=int, default=1000, help='Data generation batch size')
     full_parser.add_argument('--train_batch_size', type=int, default=512, help='Training batch size')
     full_parser.add_argument('--inference_samples', type=int, default=10000, help='Inference samples')
@@ -732,11 +732,11 @@ Examples:
     full_parser.add_argument('--detection_limit', type=float, default=-0.65, help='Detection limit')
     full_parser.add_argument('--full_trajectory', action='store_true', help='Use full trajectory')
     full_parser.add_argument('--learning_rate', type=float, default=5e-4, help='Learning rate')
-    full_parser.add_argument('--max_epochs', type=int, default=500, help='Max epochs')
+    full_parser.add_argument('--max_epochs', type=int, default=1000, help='Max epochs')
     full_parser.add_argument('--validation_fraction', type=float, default=0.15, help='Validation fraction')
-    full_parser.add_argument('--early_stopping', type=int, default=50, help='Early stopping')
-    full_parser.add_argument('--hidden_features', type=int, default=256, help='Hidden features')
-    full_parser.add_argument('--num_transforms', type=int, default=8, help='Number of transforms')
+    full_parser.add_argument('--early_stopping', type=int, default=100, help='Early stopping')
+    full_parser.add_argument('--hidden_features', type=int, default=512, help='Hidden features')
+    full_parser.add_argument('--num_transforms', type=int, default=12, help='Number of transforms')
     full_parser.add_argument('--min_detections', type=int, default=5, help='Min detections')
     full_parser.add_argument('--min_peak_vl', type=float, default=2.0, help='Min peak viral load')
     

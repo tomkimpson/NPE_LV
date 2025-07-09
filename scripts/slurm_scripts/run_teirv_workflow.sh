@@ -21,13 +21,13 @@
 # Modify the parameters below as needed:
 
 # Workflow parameters
-N_SAMPLES=100000             # Increased training samples for better convergence
+N_SAMPLES=200000             # Enhanced training samples for better convergence
 WORKFLOW_NAME="production_run_$(date +%Y%m%d_%H%M%S)"
 DEVICE="cuda"                # Use GPU for training
 # NOTE: Uses t_max=10.0 days by default (training on early infection dynamics)
-MAX_EPOCHS=500               # Extended training epochs for better convergence
-HIDDEN_FEATURES=256          # Neural network size
-NUM_TRANSFORMS=8             # Normalizing flow complexity
+MAX_EPOCHS=1000              # Extended training epochs for better convergence
+HIDDEN_FEATURES=512          # Larger neural network for better expressivity
+NUM_TRANSFORMS=12            # More transforms for better posterior approximation
 
 # Training parameters
 TRAIN_BATCH_SIZE=512         # Training batch size
@@ -48,6 +48,8 @@ echo "Workflow name: $WORKFLOW_NAME"
 echo "Training samples: $N_SAMPLES"
 echo "Device: $DEVICE"
 echo "Max epochs: $MAX_EPOCHS"
+echo "Hidden features: $HIDDEN_FEATURES"
+echo "Transforms: $NUM_TRANSFORMS"
 echo "=========================================="
 
 # Create output directories

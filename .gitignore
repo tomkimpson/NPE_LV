@@ -1,10 +1,17 @@
 # Large data files
 data/
 models/
-workflows/
 results*/
 sbi-logs/
 test_output/
+
+# Workflows data files (keep Python scripts, exclude data)
+workflows/**/*.pkl
+workflows/**/*.npy
+workflows/**/*.csv
+workflows/**/*.png
+workflows/**/production_run_*/
+workflows/demo/
 
 # External submodules are tracked by .gitmodules
 # Their contents are managed separately

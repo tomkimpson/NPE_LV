@@ -1,0 +1,22 @@
+/fred/oz022/tkimpson/NPE_LV/src/TEIRV/teirv_inference.py:282: UserWarning: When the inference object is pickled, the behaviour of the loaded object changes in the following two ways: 1) `.train(..., retrain_from_scratch=True)` is not supported. 2) When the loaded object calls the `.train()` method, it generates a new tensorboard summary writer (instead of appending to the current one).
+  pickle.dump(data, f)
+
+real	34m0.612s
+user	28m50.850s
+sys	0m7.729s
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]/fred/oz022/tkimpson/conda_envs/NPE_LV/lib/python3.11/site-packages/nflows/transforms/lu.py:80: UserWarning: torch.triangular_solve is deprecated in favor of torch.linalg.solve_triangularand will be removed in a future PyTorch release.
+torch.linalg.solve_triangular has its arguments reversed and does not return a copy of one of the inputs.
+X = torch.triangular_solve(B, A).solution
+should be replaced with
+X = torch.linalg.solve_triangular(A, B). (Triggered internally at ../aten/src/ATen/native/BatchLinearAlgebra.cpp:2190.)
+  outputs, _ = torch.triangular_solve(
+Drawing 20000 posterior samples:  50%|█████     | 10000/20000 [00:00<00:00, 10364.21it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 10990.31it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 10888.78it/s]
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples:  50%|█████     | 10000/20000 [00:00<00:00, 11035.23it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 10214.55it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 10327.73it/s]
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples:  50%|█████     | 10000/20000 [00:00<00:00, 11054.07it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 11418.39it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 11360.00it/s]
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples:  50%|█████     | 10000/20000 [00:00<00:00, 11399.08it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 11420.52it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 11414.98it/s]
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples:  50%|█████     | 10000/20000 [00:00<00:00, 11435.69it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 11202.95it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 11235.12it/s]
+Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples:  50%|█████     | 10000/20000 [00:00<00:00, 10381.21it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 10378.80it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:01<00:00, 10377.33it/s]
+
+real	10m48.804s
+user	10m21.465s
+sys	0m17.389s

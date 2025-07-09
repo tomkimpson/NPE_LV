@@ -380,7 +380,7 @@ class TEIRVWorkflow:
     def _create_predictive_plot(self, patient_id: str, posterior_samples: torch.Tensor, 
                                observations: torch.Tensor, n_pred_samples: int = 20) -> plt.Figure:
         """
-        Create predictive plot with credible intervals.
+        Create predictive plot using posterior mean prediction.
         
         Parameters:
         -----------
@@ -391,96 +391,56 @@ class TEIRVWorkflow:
         observations : torch.Tensor
             Observed RT-PCR data
         n_pred_samples : int
-            Number of posterior samples to use for predictions
+            Not used - kept for compatibility
             
         Returns:
         --------
         fig : matplotlib.figure.Figure
             Predictive plot figure
         """
-        print(f"  Generating {n_pred_samples} posterior predictions...")
+        print(f"  Generating prediction using posterior mean...")
         
         # Timing for progress estimation
         import time
         start_time = time.time()
-        first_sim_time = None
         
-        # Time grids
+        # Time grids with higher resolution for smoother curves
         t_obs = np.arange(0, 11, 1.0)  # Observed range: 0-10 days (training data)
-        t_pred = np.arange(0, 21, 1.0)  # Extended range: 0-20 days (prediction)
+        t_pred = np.arange(0, 21, 0.1)  # Extended range: 0-20 days with 0.1 day steps
         
-        # Select subset of posterior samples
-        n_samples = min(n_pred_samples, len(posterior_samples))
-        sample_indices = np.random.choice(len(posterior_samples), n_samples, replace=False)
-        selected_samples = posterior_samples[sample_indices]
+        # Compute posterior mean parameters
+        posterior_mean = torch.mean(posterior_samples, dim=0)
+        print(f"    Using posterior mean: {posterior_mean.numpy()}")
         
-        # Generate predictions
-        predictions_obs = []  # For observed range
-        predictions_ext = []  # For extended range
-        
+        # Generate single prediction using posterior mean
         base_ic = get_teirv_initial_conditions()
         
-        for i, theta_sample in enumerate(selected_samples):
-            sim_start = time.time()
+        try:
+            # Set up initial conditions
+            ic = base_ic.copy()
+            ic['V'] = posterior_mean[5].item()  # V₀ from posterior mean
             
-            # Progress reporting
-            if i % 5 == 0 or i == 0:
-                print(f"    Processing sample {i+1}/{n_samples}...")
-            try:
-                # Set up initial conditions
-                ic = base_ic.copy()
-                ic['V'] = theta_sample[5].item()  # V₀ from posterior
-                
-                # Simulate for extended range
-                _, trajectory_ext = gillespie_teirv(
-                    theta=theta_sample.numpy(),
-                    initial_conditions=ic,
-                    t_max=20.0,
-                    t_grid=t_pred,
-                    max_steps=1000000
-                )
-                
-                # Apply observation model (RT-PCR transformation)
-                V_trajectory_ext = trajectory_ext[:, 4]  # V compartment
-                obs_ext = apply_observation_model(
-                    V_trajectory=V_trajectory_ext,
-                    sigma=1.0,  # Standard observation noise
-                    detection_limit=-0.65,
-                    add_noise=True
-                )
-                
-                # Extract observed range (first 11 points: 0-10 days)
-                obs_range = obs_ext[:11]
-                
-                predictions_obs.append(obs_range)
-                predictions_ext.append(obs_ext)
-                
-                # Time estimation after first simulation
-                if i == 0:
-                    first_sim_time = time.time() - sim_start
-                    estimated_total = first_sim_time * n_samples
-                    print(f"    Estimated total simulation time: {estimated_total:.1f}s ({estimated_total/60:.1f} min)")
-                
-            except Exception as e:
-                print(f"    Simulation {i} failed: {e}")
-                continue
-        
-        if len(predictions_obs) == 0:
-            print("  ❌ No successful predictions generated")
+            # Simulate for extended range with fine time grid
+            _, trajectory_ext = gillespie_teirv(
+                theta=posterior_mean.numpy(),
+                initial_conditions=ic,
+                t_max=20.0,
+                t_grid=t_pred,
+                max_steps=1000000
+            )
+            
+            # Apply observation model (RT-PCR transformation)
+            V_trajectory_ext = trajectory_ext[:, 4]  # V compartment
+            obs_ext = apply_observation_model(
+                V_trajectory=V_trajectory_ext,
+                sigma=1.0,  # Standard observation noise
+                detection_limit=-0.65,
+                add_noise=False  # No noise for mean prediction
+            )
+            
+        except Exception as e:
+            print(f"  ❌ Simulation failed: {e}")
             return plt.figure()
-        
-        # Convert to arrays and compute credible intervals
-        pred_obs_array = np.array(predictions_obs)  # Shape: (n_samples, 11)
-        pred_ext_array = np.array(predictions_ext)  # Shape: (n_samples, 21)
-        
-        # Compute quantiles
-        quantiles = [0.025, 0.125, 0.25, 0.5, 0.75, 0.875, 0.975]  # 0%, 25%, 50%, 75%, 95%
-        
-        # Observed range credible intervals
-        ci_obs = np.percentile(pred_obs_array, [2.5, 12.5, 25, 50, 75, 87.5, 97.5], axis=0)
-        
-        # Extended range credible intervals  
-        ci_ext = np.percentile(pred_ext_array, [2.5, 12.5, 25, 50, 75, 87.5, 97.5], axis=0)
         
         # Create plot
         fig, ax = plt.subplots(figsize=(12, 8))
@@ -489,31 +449,9 @@ class TEIRVWorkflow:
         ax.scatter(t_obs, observations.numpy(), color='black', s=80, 
                   label='Observed data', zorder=10, alpha=0.8)
         
-        # Plot credible intervals for observed range (red)
-        # 95% CI
-        ax.fill_between(t_obs, ci_obs[0], ci_obs[6], alpha=0.2, color='red', 
-                       label='95% CI (observed)')
-        # 75% CI
-        ax.fill_between(t_obs, ci_obs[1], ci_obs[5], alpha=0.3, color='red')
-        # 50% CI  
-        ax.fill_between(t_obs, ci_obs[2], ci_obs[4], alpha=0.4, color='red')
-        # Median (observed range)
-        ax.plot(t_obs, ci_obs[3], color='darkred', linewidth=2, label='Median (observed)')
-        
-        # Plot credible intervals for extended range (purple) - connected to observed range
-        t_pred_ext = t_pred[10:]  # Start from day 10 to connect with observed range
-        ci_ext_pred = ci_ext[:, 10:]  # Start from day 10 to connect
-        
-        # 95% CI
-        ax.fill_between(t_pred_ext, ci_ext_pred[0], ci_ext_pred[6], alpha=0.2, color='purple',
-                       label='95% CI (predicted)')
-        # 75% CI
-        ax.fill_between(t_pred_ext, ci_ext_pred[1], ci_ext_pred[5], alpha=0.3, color='purple')
-        # 50% CI
-        ax.fill_between(t_pred_ext, ci_ext_pred[2], ci_ext_pred[4], alpha=0.4, color='purple')
-        # Median (predicted range) - connected to observed range
-        ax.plot(t_pred_ext, ci_ext_pred[3], color='darkviolet', linewidth=2, 
-               label='Median (predicted)')
+        # Plot mean prediction curve
+        ax.plot(t_pred, obs_ext, color='blue', linewidth=2, 
+               label='Posterior mean prediction')
         
         # Add vertical line at transition
         ax.axvline(x=10, color='gray', linestyle='--', alpha=0.7, 
@@ -522,12 +460,12 @@ class TEIRVWorkflow:
         # Formatting
         ax.set_xlabel('Time (days)', fontsize=12)
         ax.set_ylabel('log₁₀ Viral Load', fontsize=12)
-        ax.set_title(f'Patient {patient_id}: Posterior Predictive Check', fontsize=14)
+        ax.set_title(f'Patient {patient_id}: Posterior Mean Prediction', fontsize=14)
         ax.grid(True, alpha=0.3)
         ax.legend(loc='upper right', fontsize=10)
         
         # Set reasonable y-limits for log10 viral load data
-        all_data = np.concatenate([observations.numpy(), ci_obs.flatten(), ci_ext.flatten()])
+        all_data = np.concatenate([observations.numpy(), obs_ext])
         y_min = np.min(all_data) - 0.5  # Add some padding below
         y_max = np.max(all_data) + 0.5  # Add some padding above
         ax.set_ylim(y_min, y_max)
@@ -538,7 +476,8 @@ class TEIRVWorkflow:
         
         plt.tight_layout()
         
-        print(f"  ✅ Generated predictions from {len(predictions_obs)} successful simulations")
+        simulation_time = time.time() - start_time
+        print(f"  ✅ Generated posterior mean prediction in {simulation_time:.1f}s")
         return fig
     
     def _create_clinical_plots(self, results: Dict, output_path: Path):
@@ -770,7 +709,7 @@ Examples:
     # Inference mode
     inference_parser = subparsers.add_parser('inference', help='Run inference on patient data')
     inference_parser.add_argument('--model', type=str, required=True, help='NPE model path')
-    inference_parser.add_argument('--output', type=str, default='results/inference', help='Output directory')
+    inference_parser.add_argument('--output', type=str, default='inference_results', help='Output directory')
     inference_parser.add_argument('--n_samples', type=int, default=10000, help='Posterior samples')
     inference_parser.add_argument('--patients', type=str, nargs='+', default=None, help='Specific patients')
     inference_parser.add_argument('--min_detections', type=int, default=5, help='Min detections')

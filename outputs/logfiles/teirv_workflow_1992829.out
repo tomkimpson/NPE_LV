@@ -1,0 +1,112 @@
+==========================================
+TEIRV NPE Full Workflow
+==========================================
+Job ID: 1992829
+Node: gina15
+Start time: Fri Jul  4 13:45:46 AEST 2025
+Workflow name: production_run_20250704_134546
+Training samples: 100000
+Device: cuda
+Max epochs: 500
+==========================================
+Checking CUDA availability...
+CUDA available: True
+CUDA devices: 1
+NVIDIA GPU info:
+Fri Jul  4 13:47:26 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:C1:00.0 Off |                    0 |
+| N/A   26C    P0             63W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
+|        ID   ID                                                               Usage      |
+|=========================================================================================|
+|  No running processes found                                                             |
++-----------------------------------------------------------------------------------------+
+==========================================
+Starting TEIRV workflow at Fri Jul  4 13:47:26 AEST 2025
+🚀 TEIRV NPE Complete Pipeline
+==================================================
+📁 Workflow directory: workflows/production_run_20250704_134546
+📊 Training samples: 100000
+🔧 Device: cuda
+
+🔬 Step 1: Generating training data...
+🔬 TEIRV Training Data Generation
+==================================================
+Samples: 100000
+Simulation timespan: [0, 10.0] days
+Observation grid: 11 points at 1.0-day intervals
+Observation type: RT-PCR only
+RT-PCR noise: 1.0
+Detection limit: -0.65
+Output: workflows/production_run_20250704_134546/training_data.pkl
+
+TEIRV Parameter Priors:
+------------------------------
+  β (infection rate):       Uniform(0.0, 20.0)
+  π (virion production):    Uniform(200.0, 600.0)
+  δ (cell clearance):       Uniform(1.0, 11.0)
+  φ (interferon protection): Uniform(0.0, 15.0)
+  ρ (reversion rate):       Uniform(0.0, 1.0)
+  V₀ (initial virions):     exp(Uniform(0.0, 5.0)) ≈ [1, 148]
+
+Starting data generation...
+Generated 100000/100000 valid samples (0 failed)
+Saved TEIRV data to workflows/production_run_20250704_134546/training_data.pkl
+Data shapes: theta=torch.Size([100000, 6]), x=torch.Size([100000, 11])
+
+✅ DATA GENERATION COMPLETED
+⏱️  Generation time: 37927.6 seconds
+📊 Generated 100000 valid samples
+⚡ Generation rate: 2.6 samples/second
+
+🧠 Step 2: Training NPE model...
+🧠 TEIRV NPE Model Training
+==================================================
+Data: workflows/production_run_20250704_134546/training_data.pkl
+Output: workflows/production_run_20250704_134546/npe_model.pkl
+Device: cuda
+
+✅ Loaded 100000 training samples
+Parameter shape: torch.Size([100000, 6])
+Observation shape: torch.Size([100000, 11])
+Observation type: rt_pcr
+Starting training...
+Training TEIRV NPE with 100000 samples...
+Parameter shape: torch.Size([100000, 6])
+Observation shape: torch.Size([100000, 11])
+Observation type: rt_pcr
+🎯 Extended Training Configuration:
+   • Max epochs: 500
+   • Early stopping patience: 50
+   • Learning rate: 0.0005
+   • Training batch size: 512
+   • Validation fraction: 0.15
+ Training neural network. Epochs trained: 1 Training neural network. Epochs trained: 2 Training neural network. Epochs trained: 3 Training neural network. Epochs trained: 4 Training neural network. Epochs trained: 5 Training neural network. Epochs trained: 6 Training neural network. Epochs trained: 7 Training neural network. Epochs trained: 8 Training neural network. Epochs trained: 9 Training neural network. Epochs trained: 10 Training neural network. Epochs trained: 11 Training neural network. Epochs trained: 12 Training neural network. Epochs trained: 13 Training neural network. Epochs trained: 14 Training neural network. Epochs trained: 15 Training neural network. Epochs trained: 16 Training neural network. Epochs trained: 17 Training neural network. Epochs trained: 18 Training neural network. Epochs trained: 19 Training neural network. Epochs trained: 20 Training neural network. Epochs trained: 21 Training neural network. Epochs trained: 22 Training neural network. Epochs trained: 23 Training neural network. Epochs trained: 24 Training neural network. Epochs trained: 25 Training neural network. Epochs trained: 26 Training neural network. Epochs trained: 27 Training neural network. Epochs trained: 28 Training neural network. Epochs trained: 29 Training neural network. Epochs trained: 30 Training neural network. Epochs trained: 31 Training neural network. Epochs trained: 32 Training neural network. Epochs trained: 33 Training neural network. Epochs trained: 34 Training neural network. Epochs trained: 35 Training neural network. Epochs trained: 36 Training neural network. Epochs trained: 37 Training neural network. Epochs trained: 38 Training neural network. Epochs trained: 39 Training neural network. Epochs trained: 40 Training neural network. Epochs trained: 41 Training neural network. Epochs trained: 42 Training neural network. Epochs trained: 43 Training neural network. Epochs trained: 44 Training neural network. Epochs trained: 45 Training neural network. Epochs trained: 46 Training neural network. Epochs trained: 47 Training neural network. Epochs trained: 48 Training neural network. Epochs trained: 49 Training neural network. Epochs trained: 50 Training neural network. Epochs trained: 51 Training neural network. Epochs trained: 52 Training neural network. Epochs trained: 53 Training neural network. Epochs trained: 54 Training neural network. Epochs trained: 55 Training neural network. Epochs trained: 56 Training neural network. Epochs trained: 57 Training neural network. Epochs trained: 58 Training neural network. Epochs trained: 59 Training neural network. Epochs trained: 60 Training neural network. Epochs trained: 61 Training neural network. Epochs trained: 62 Training neural network. Epochs trained: 63 Training neural network. Epochs trained: 64 Training neural network. Epochs trained: 65 Neural network successfully converged after 65 epochs.
+        -------------------------
+        ||||| ROUND 1 STATS |||||:
+        -------------------------
+        Epochs trained: 65
+        Best validation performance: 17.2649
+        -------------------------
+        
+❌ Error during training: 'NFlowsFlow' object has no attribute 'get'
+==========================================
+Workflow completed at Sat Jul  5 00:43:11 AEST 2025
+Exit code: 1
+❌ WORKFLOW FAILED with exit code 1
+Check the log files for details:
+  - Standard output: outputs/logfiles/teirv_workflow_1992829.out
+  - Standard error: outputs/logfiles/teirv_workflow_1992829.err
+==========================================

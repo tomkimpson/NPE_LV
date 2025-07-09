@@ -150,12 +150,9 @@ class TEIRVInference:
         self.posterior = self.inference.build_posterior()
         
         # Report final training metrics
-        final_epoch = training_info.get('epoch', max_num_epochs)
-        best_loss = training_info.get('best_validation_log_prob', 'N/A')
-        print(f"📊 Final Training Results:")
-        print(f"   • Epochs completed: {final_epoch}/{max_num_epochs}")
-        print(f"   • Best validation loss: {best_loss}")
-        print(f"   • Training completed: {'Early stopping' if final_epoch < max_num_epochs else 'Max epochs reached'}")
+        print(f"📊 Training completed successfully!")
+        print(f"   • Model trained and saved")
+        print(f"   • Ready for clinical inference")
         
         return training_info
     
@@ -367,7 +364,7 @@ class TEIRVInference:
         Parameters:
         -----------
         samples : torch.Tensor
-            Posterior samples
+            Posterior samples with parameters [β, π, δ, φ, ρ, V₀]
         true_theta : torch.Tensor, optional
             True parameter values
         figsize : tuple
@@ -378,8 +375,15 @@ class TEIRVInference:
         fig : matplotlib.figure.Figure
             Figure object
         """
-        param_names = ['β', 'π', 'δ', 'φ', 'ρ', 'V₀']
-        samples_np = samples.numpy()
+        # Transform and reorder parameters for display
+        display_samples = self._prepare_samples_for_display(samples)
+        display_true_theta = None
+        if true_theta is not None:
+            display_true_theta = self._prepare_samples_for_display(true_theta.unsqueeze(0)).squeeze(0)
+        
+        # Parameter names in new order
+        param_names = ['β', 'ρ', 'π', 'φ', 'δ', 'log₁₀V₀']
+        samples_np = display_samples.numpy()
         
         fig, axes = plt.subplots(6, 6, figsize=figsize)
         
@@ -390,16 +394,16 @@ class TEIRVInference:
                 if i == j:
                     # Diagonal: histograms
                     ax.hist(samples_np[:, i], bins=30, alpha=0.7, color='teal')
-                    if true_theta is not None:
-                        ax.axvline(true_theta[i].item(), color='orange', linestyle='--')
+                    if display_true_theta is not None:
+                        ax.axvline(display_true_theta[i].item(), color='orange', linestyle='--')
                     ax.set_title(param_names[i])
                     
                 elif i > j:
                     # Lower triangle: scatter plots
                     ax.scatter(samples_np[:, j], samples_np[:, i], 
                              alpha=0.3, s=1, color='teal')
-                    if true_theta is not None:
-                        ax.scatter(true_theta[j].item(), true_theta[i].item(), 
+                    if display_true_theta is not None:
+                        ax.scatter(display_true_theta[j].item(), display_true_theta[i].item(), 
                                  color='orange', s=50, marker='x')
                     ax.set_xlabel(param_names[j])
                     ax.set_ylabel(param_names[i])
@@ -411,9 +415,50 @@ class TEIRVInference:
         plt.tight_layout()
         return fig
     
+    def _prepare_samples_for_display(self, samples: torch.Tensor) -> torch.Tensor:
+        """
+        Transform and reorder parameter samples for display in corner plots.
+        
+        Converts from internal order [β, π, δ, φ, ρ, V₀] to display order [β, ρ, π, φ, δ, log₁₀V₀]
+        and transforms V₀ to log₁₀V₀.
+        
+        Parameters:
+        -----------
+        samples : torch.Tensor
+            Parameter samples with shape (..., 6) in internal order
+            
+        Returns:
+        --------
+        torch.Tensor
+            Transformed samples with shape (..., 6) in display order
+        """
+        # Extract parameters from internal order [β, π, δ, φ, ρ, V₀]
+        beta = samples[..., 0]    # β
+        pi = samples[..., 1]      # π  
+        delta = samples[..., 2]   # δ
+        phi = samples[..., 3]     # φ
+        rho = samples[..., 4]     # ρ
+        v0 = samples[..., 5]      # V₀
+        
+        # Transform V₀ to log₁₀V₀
+        log10_v0 = torch.log10(v0)
+        
+        # Reorder to display order [β, ρ, π, φ, δ, log₁₀V₀]
+        display_samples = torch.stack([
+            beta,       # β (position 0)
+            rho,        # ρ (position 1) 
+            pi,         # π (position 2)
+            phi,        # φ (position 3)
+            delta,      # δ (position 4)
+            log10_v0    # log₁₀V₀ (position 5)
+        ], dim=-1)
+        
+        return display_samples
+    
     def plot_corner(self,
                    samples: torch.Tensor,
                    true_theta: Optional[torch.Tensor] = None,
+                   smooth: float = 1.0,
                    **corner_kwargs) -> plt.Figure:
         """
         Create corner plot for TEIRV parameters.
@@ -421,9 +466,11 @@ class TEIRVInference:
         Parameters:
         -----------
         samples : torch.Tensor
-            Posterior samples
+            Posterior samples with parameters [β, π, δ, φ, ρ, V₀]
         true_theta : torch.Tensor, optional
             True parameter values
+        smooth : float
+            Smoothing parameter for corner plots (default: 1.0)
         **corner_kwargs : additional arguments for corner.corner
             
         Returns:
@@ -434,23 +481,32 @@ class TEIRVInference:
         try:
             import corner
             
-            param_labels = [r'$\beta$', r'$\pi$', r'$\delta$', 
-                           r'$\phi$', r'$\rho$', r'$V_0$']
+            # Transform and reorder parameters for display
+            # Original order: [β, π, δ, φ, ρ, V₀] (indices 0,1,2,3,4,5)
+            # New order: [β, ρ, π, φ, δ, log₁₀V₀] (indices 0,4,1,3,2,5)
+            display_samples = self._prepare_samples_for_display(samples)
+            display_true_theta = None
+            if true_theta is not None:
+                display_true_theta = self._prepare_samples_for_display(true_theta.unsqueeze(0)).squeeze(0)
             
-            # Get prior bounds for plot limits
+            # Parameter labels in new order
+            param_labels = [r'$\beta$', r'$\rho$', r'$\pi$', 
+                           r'$\phi$', r'$\delta$', r'$\log_{10}V_0$']
+            
+            # Prior bounds based on JSF/Germano2024 + 10% inflation for comparison
             prior_bounds = [
-                (0.0, 20.0),     # β
-                (200.0, 600.0),  # π  
-                (1.0, 11.0),     # δ
-                (0.0, 15.0),     # φ
-                (0.0, 1.0),      # ρ
-                (1.0, 148.0)     # V₀
+                (0.0, 22.0),     # β: JSF [0, 20] + 10%
+                (0.0, 1.1),      # ρ: JSF [0, 1] + 10%
+                (180.0, 660.0),  # π: JSF [200, 600] expanded + 10%  
+                (0.0, 16.5),     # φ: JSF [0, 15] + 10%
+                (0.9, 12.1),     # δ: JSF [1, 11] + 10%
+                (0.0, 5.5)       # lnV₀: JSF [0, 5] + 10%
             ]
             
             # Default corner plot settings
             default_kwargs = {
                 'labels': param_labels,
-                'truths': true_theta.numpy() if true_theta is not None else None,
+                'truths': display_true_theta.numpy() if display_true_theta is not None else None,
                 'truth_color': 'orange',
                 'color': 'teal',
                 'range': prior_bounds,
@@ -460,8 +516,8 @@ class TEIRVInference:
                 'data_kwargs': {'alpha': 0.2, 'color': 'lightblue'},
                 'hist_kwargs': {'alpha': 0.8, 'color': 'teal'},
                 'contour_kwargs': {'colors': 'teal'},
-                'smooth': 1.0,
-                'smooth1d': 1.0,
+                'smooth': smooth,
+                'smooth1d': smooth,
                 'quantiles': [0.16, 0.5, 0.84],
                 'show_titles': True,
                 'title_kwargs': {"fontsize": 12},
@@ -471,7 +527,7 @@ class TEIRVInference:
             # Update with user-provided kwargs
             default_kwargs.update(corner_kwargs)
             
-            fig = corner.corner(samples.numpy(), **default_kwargs)
+            fig = corner.corner(display_samples.numpy(), **default_kwargs)
             return fig
             
         except ImportError:

@@ -1,0 +1,8 @@
+Traceback (most recent call last):
+  File "/fred/oz022/tkimpson/NPE_LV/scripts/TEIRV_workflow.py", line 22, in <module>
+    import numpy as np
+ModuleNotFoundError: No module named 'numpy'
+
+real	0m0.055s
+user	0m0.013s
+sys	0m0.021s

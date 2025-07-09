@@ -220,6 +220,47 @@ def get_teirv_fixed_parameters() -> Dict[str, float]:
     }
 
 
+def calculate_r0(posterior_samples: np.ndarray) -> np.ndarray:
+    """
+    Calculate basic reproduction number R₀ for TEIRV model.
+    
+    R₀ = (π × β × T(0)) / (δ × c)
+    
+    Where:
+    - π: virion production rate (parameter index 1)
+    - β: infection rate (parameter index 0, scaled by 10⁻⁹)
+    - T(0): initial target cells = 8×10⁷
+    - δ: cell clearance rate (parameter index 2) 
+    - c: viral clearance rate = 10.0 (fixed)
+    
+    Parameters:
+    -----------
+    posterior_samples : np.ndarray
+        Posterior samples with shape (n_samples, 6) in order [β, π, δ, φ, ρ, V₀]
+        
+    Returns:
+    --------
+    r0_samples : np.ndarray
+        R₀ values for each posterior sample with shape (n_samples,)
+    """
+    # Extract parameters (order: [β, π, δ, φ, ρ, V₀])
+    beta = posterior_samples[:, 0]  # Infection rate
+    pi = posterior_samples[:, 1]    # Virion production rate  
+    delta = posterior_samples[:, 2] # Cell clearance rate
+    
+    # Fixed parameters from model
+    T0 = 8e7    # Initial target cells
+    c = 10.0    # Viral clearance rate (fixed in gillespie_teirv)
+    
+    # Apply scaling factor for β (as done in gillespie_teirv line 111)
+    beta_scaled = beta * 1e-9
+    
+    # Calculate R₀ = (π × β × T(0)) / (δ × c)
+    r0_samples = (pi * beta_scaled * T0) / (delta * c)
+    
+    return r0_samples
+
+
 def create_teirv_time_grid(t_max: float = 10.0, dt: float = 1.0) -> np.ndarray:
     """
     Create time grid for TEIRV simulation matching training data.

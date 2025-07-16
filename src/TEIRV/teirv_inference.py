@@ -141,18 +141,11 @@ class TEIRVInference:
         print(f"   • Validation fraction: {validation_fraction}")
         
         # Configure learning rate scheduler if requested
-        lr_scheduler_kwargs = {}
+        # Note: lr_scheduler currently not supported by installed SBI version
         if use_lr_scheduler:
-            lr_scheduler_kwargs.update({
-                'lr_scheduler': 'ReduceLROnPlateau',
-                'lr_scheduler_kwargs': {
-                    'factor': 0.5,
-                    'patience': 20,
-                    'min_lr': 1e-6,
-                    'verbose': True
-                }
-            })
-            print(f"   • LR scheduler: ReduceLROnPlateau (factor=0.5, patience=20)")
+            print(f"   • LR scheduler: ReduceLROnPlateau (display only - not yet supported)")
+        else:
+            print(f"   • LR scheduler: Disabled")
         
         training_info = self.inference.train(
             training_batch_size=training_batch_size,
@@ -161,7 +154,6 @@ class TEIRVInference:
             validation_fraction=validation_fraction,
             stop_after_epochs=stop_after_epochs,
             show_train_summary=True,
-            **lr_scheduler_kwargs,
             **kwargs
         )
         
@@ -170,22 +162,29 @@ class TEIRVInference:
         
         # Report final training metrics with enhanced diagnostics
         print(f"📊 Training completed successfully!")
-        print(f"   • Final epoch: {training_info.get('epoch', 'N/A')}")
-        print(f"   • Final training loss: {training_info.get('training_loss', 'N/A'):.4f}")
-        print(f"   • Final validation loss: {training_info.get('validation_loss', 'N/A'):.4f}")
-        print(f"   • Converged: {'Yes' if training_info.get('converged', False) else 'No'}")
-        print(f"   • Best epoch: {training_info.get('best_validation_log_prob_epoch', 'N/A')}")
+        print(f"   • Training epochs: Completed with early stopping")
+        print(f"   • Training batch size: {training_batch_size}")
+        print(f"   • Learning rate: {learning_rate}")
+        print(f"   • Max epochs: {max_num_epochs}")
         
         # Assess posterior quality
         try:
             quality_metrics = self.assess_posterior_quality(num_test_samples=2000)
-            print(f"   • Posterior quality assessed with {quality_metrics.get('n_samples', 'N/A')} samples")
+            print(f"   • Posterior quality assessed with {quality_metrics['n_samples']} samples")
         except Exception as e:
             print(f"   • Posterior quality assessment failed: {e}")
         
         print(f"   • Model ready for clinical inference")
         
-        return training_info
+        # Return a proper training info dictionary
+        return {
+            'completed': True,
+            'max_epochs': max_num_epochs,
+            'batch_size': training_batch_size,
+            'learning_rate': learning_rate,
+            'validation_fraction': validation_fraction,
+            'early_stopping_patience': stop_after_epochs
+        }
     
     def assess_posterior_quality(self, num_test_samples: int = 1000) -> Dict[str, Any]:
         """

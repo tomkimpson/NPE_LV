@@ -161,12 +161,12 @@ def create_parameter_grid_plot(parameter_data: Dict[str, np.ndarray],
     
     # Parameter bounds from TEIRV prior for consistent x-axis limits (updated ordering)
     param_bounds = [
-        (0.0, 20.0),      # β: infection rate
-        (0.0, 1.0),       # ρ: reversion rate
-        (200.0, 600.0),   # π: virion production
-        (0.0, 15.0),      # φ: interferon protection
-        (1.0, 11.0),      # δ: cell clearance
-        (0.0, 5.0),       # log₁₀V₀: log initial viral load
+        (-1.0, 22.0),      # β: infection rate
+        (-0.5, 1.5),       # ρ: reversion rate
+        (150.0, 650.0),   # π: virion production
+        (0.0, 16.0),      # φ: interferon protection
+        (0.0, 12.0),      # δ: cell clearance
+        (0.0, 2.1),       # log₁₀V₀: log initial viral load
     ]
     
     # Sort patient IDs for consistent ordering

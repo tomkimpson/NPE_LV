@@ -15,6 +15,7 @@ workflows/demo/
 
 # External submodules are tracked by .gitmodules
 # Their contents are managed separately
+external/*
 
 # Python
 __pycache__/

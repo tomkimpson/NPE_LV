@@ -261,11 +261,13 @@ def calculate_r0(posterior_samples: np.ndarray) -> np.ndarray:
     return r0_samples
 
 
-def create_teirv_time_grid(t_max: float = 10.0, dt: float = 1.0) -> np.ndarray:
+def create_teirv_time_grid(t_max: float = 10.0, dt: float = 1.0, t_start: float = 1.0) -> np.ndarray:
     """
-    Create time grid for TEIRV simulation matching training data.
+    Create time grid for TEIRV simulation matching clinical data.
     
-    Training data uses 10 daily measurements for early infection dynamics.
+    By default, starts at t=1 to match original JSF clinical data which begins
+    1 day post-symptom onset. This avoids artificial extrapolation of the first
+    observation backward to t=0.
     
     Parameters:
     -----------
@@ -273,13 +275,16 @@ def create_teirv_time_grid(t_max: float = 10.0, dt: float = 1.0) -> np.ndarray:
         Maximum time (days)
     dt : float
         Time step (days)
+    t_start : float
+        Start time (days). Default=1.0 to match JSF data format.
+        Use t_start=0.0 for simulations that require t=0 start.
         
     Returns:
     --------
     t_grid : np.ndarray
-        Time grid
+        Time grid starting from t_start
     """
-    return np.arange(0, t_max + dt, dt)
+    return np.arange(t_start, t_max + dt, dt)
 
 
 def apply_observation_model(

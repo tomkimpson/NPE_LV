@@ -14,6 +14,7 @@ Model compartments:
 import numpy as np
 from typing import Tuple, Optional, Dict, Any
 import warnings
+from scipy.integrate import solve_ivp
 
 
 def gillespie_teirv(
@@ -184,6 +185,168 @@ def gillespie_teirv(
     return times, states
 
 
+def ode_teirv(
+    theta: np.ndarray,
+    initial_conditions: Dict[str, float],
+    t_max: float,
+    t_grid: Optional[np.ndarray] = None,
+    max_step: Optional[float] = None,
+    rtol: float = 1e-8,
+    atol: float = 1e-10,
+    **kwargs
+) -> Tuple[np.ndarray, np.ndarray]:
+    """
+    Simulate TEIRV model using ODE solver (deterministic).
+    
+    The model has 7 reactions converted to differential equations:
+    dT/dt = ρ*R - β*T*V - φ*T*I
+    dE/dt = β*T*V - k*E
+    dI/dt = k*E - δ*I
+    dR/dt = φ*T*I - ρ*R
+    dV/dt = π*I - c*V
+    
+    Parameters:
+    -----------
+    theta : np.ndarray of shape (6,) or dict
+        Parameters [β, φ, ρ, k, δ, π, c] or subset for inference
+        If array: [β, π, δ, φ, ρ, V0] (6 inferred parameters)
+        If dict: can contain all parameters including fixed ones
+    initial_conditions : dict
+        Initial state: {'T': T0, 'E': E0, 'I': I0, 'R': R0, 'V': V0}
+    t_max : float
+        Maximum simulation time (days)
+    t_grid : np.ndarray, optional
+        Time points for output. If None, uses adaptive solver output
+    max_step : float, optional
+        Maximum step size for ODE solver. If None, solver chooses automatically
+    rtol : float
+        Relative tolerance for ODE solver (default: 1e-8)
+    atol : float
+        Absolute tolerance for ODE solver (default: 1e-10)
+    **kwargs : additional arguments (for compatibility)
+        
+    Returns:
+    --------
+    times : np.ndarray
+        Time points
+    states : np.ndarray of shape (len(times), 5)
+        State trajectories [T, E, I, R, V]
+    """
+    
+    # Handle parameter input format (same as Gillespie)
+    if isinstance(theta, dict):
+        beta = theta['beta']
+        phi = theta['phi'] 
+        rho = theta['rho']
+        k = theta['k']
+        delta = theta['delta']
+        pi = theta['pi']
+        c = theta['c']
+    else:
+        # Array format: [β, π, δ, φ, ρ, V0]
+        beta = theta[0]
+        pi = theta[1] 
+        delta = theta[2]
+        phi = theta[3]
+        rho = theta[4]
+        # V0 handled in initial_conditions
+        
+        # Fixed parameters (from paper)
+        k = 4.0
+        c = 10.0
+    
+    # Initial state vector [T, E, I, R, V]
+    y0 = np.array([
+        initial_conditions['T'],
+        initial_conditions['E'],
+        initial_conditions['I'],
+        initial_conditions['R'],
+        initial_conditions['V']
+    ])
+    
+    def teirv_ode_system(t, y):
+        """
+        TEIRV ODE system.
+        
+        Parameters:
+        -----------
+        t : float
+            Current time
+        y : np.ndarray
+            Current state [T, E, I, R, V]
+            
+        Returns:
+        --------
+        dydt : np.ndarray
+            Derivatives [dT/dt, dE/dt, dI/dt, dR/dt, dV/dt]
+        """
+        T, E, I, R, V = y
+        
+        # Apply same parameter scaling as Gillespie (lines 111-112 in original)
+        beta_scaled = beta * 1e-9
+        phi_scaled = phi * 1e-5
+        
+        # Differential equations based on reaction system
+        dTdt = rho * R - beta_scaled * T * V - phi_scaled * T * I
+        dEdt = beta_scaled * T * V - k * E
+        dIdt = k * E - delta * I
+        dRdt = phi_scaled * T * I - rho * R
+        dVdt = pi * I - c * V
+        
+        return np.array([dTdt, dEdt, dIdt, dRdt, dVdt])
+    
+    # Set up time span
+    if t_grid is not None:
+        # Ensure t_span covers the full range of t_grid
+        t_span = (0, max(t_max, t_grid[-1]))
+        t_eval = t_grid
+    else:
+        t_span = (0, t_max)
+        t_eval = None
+    
+    # Solve ODE system
+    try:
+        # Set up solver options
+        solver_options = {
+            'method': 'RK45',  # Runge-Kutta method
+            'rtol': rtol,      # Relative tolerance
+            'atol': atol       # Absolute tolerance
+        }
+        
+        # Add max_step if specified
+        if max_step is not None:
+            solver_options['max_step'] = max_step
+            
+        sol = solve_ivp(
+            teirv_ode_system, 
+            t_span, 
+            y0, 
+            t_eval=t_eval,
+            **solver_options
+        )
+        
+        if not sol.success:
+            raise RuntimeError(f"ODE solver failed: {sol.message}")
+            
+        times = sol.t
+        states = sol.y.T  # Transpose to match (time, state) format
+        
+        # Ensure non-negative values (biological constraint)
+        states = np.maximum(states, 0.0)
+        
+        return times, states
+        
+    except Exception as e:
+        warnings.warn(f"ODE simulation failed: {e}. Returning zeros.")
+        if t_grid is not None:
+            times = t_grid
+            states = np.zeros((len(t_grid), 5))
+        else:
+            times = np.array([0.0, t_max])
+            states = np.zeros((2, 5))
+        return times, states
+
+
 def interpolate_teirv_trajectory(
     times: np.ndarray, 
     states: np.ndarray, 
@@ -265,6 +428,58 @@ def simulate_teirv_batch(
             
         except Exception as e:
             warnings.warn(f"Simulation {i} failed: {e}. Using zeros.")
+            trajectories[i] = np.zeros((n_time, 5))
+            
+    return trajectories
+
+
+def simulate_teirv_ode_batch(
+    theta_batch: np.ndarray,
+    initial_conditions: Dict[str, float],
+    t_max: float,
+    t_grid: np.ndarray,
+    max_step: Optional[float] = None,
+    **kwargs
+) -> np.ndarray:
+    """
+    Simulate multiple TEIRV trajectories using ODE solver in batch.
+    
+    Parameters:
+    -----------
+    theta_batch : np.ndarray of shape (n_batch, 6)
+        Batch of parameter vectors [β, π, δ, φ, ρ, V0]
+    initial_conditions : dict
+        Base initial conditions (V0 will be overridden by theta)
+    t_max : float
+        Maximum simulation time
+    t_grid : np.ndarray
+        Time grid for output
+    max_step : float, optional
+        Maximum step size for ODE solver
+    **kwargs : additional arguments for ode_teirv
+        
+    Returns:
+    --------
+    trajectories : np.ndarray of shape (n_batch, len(t_grid), 5)
+        Batch of ODE trajectories [T, E, I, R, V]
+    """
+    n_batch = theta_batch.shape[0]
+    n_time = len(t_grid)
+    trajectories = np.zeros((n_batch, n_time, 5))
+    
+    for i in range(n_batch):
+        try:
+            # Set V0 from theta
+            ic = initial_conditions.copy()
+            ic['V'] = theta_batch[i, 5]  # V0 is last parameter
+            
+            _, traj = ode_teirv(
+                theta_batch[i], ic, t_max, t_grid, max_step=max_step, **kwargs
+            )
+            trajectories[i] = traj
+            
+        except Exception as e:
+            warnings.warn(f"ODE simulation {i} failed: {e}. Using zeros.")
             trajectories[i] = np.zeros((n_time, 5))
             
     return trajectories

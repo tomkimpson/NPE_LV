@@ -405,8 +405,8 @@ class TEIRVWorkflow:
         start_time = time.time()
         
         # Time grids with higher resolution for smoother curves
-        t_obs = np.arange(0, 11, 1.0)  # Observed range: 0-10 days (training data)
-        t_pred = np.arange(0, 21, 0.1)  # Extended range: 0-20 days with 0.1 day steps
+        t_obs = create_teirv_time_grid(10.0, 1.0) # Observed range: 1-10 days
+        t_pred = np.arange(1, 21, 0.1)  # Extended range: 1-20 days with 0.1 day steps
         
         # Compute posterior mean parameters
         posterior_mean = torch.mean(posterior_samples, dim=0)

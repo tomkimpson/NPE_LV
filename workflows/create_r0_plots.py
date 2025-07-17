@@ -192,28 +192,19 @@ def create_r0_plot(r0_data: Dict[str, np.ndarray], output_path: Optional[Path] =
         ax=ax
     )
     
-    # Modify violin plots to be one-sided (right side only)
-    for collection in violin_plot.collections:
-        # Get all paths in this collection
-        paths = collection.get_paths()
-        for path in paths:
-            vertices = path.vertices.copy()
-            # Find the center x position
-            x_center = np.round(np.mean(vertices[:, 0]))
-            # Keep only the right half and the center line
-            # Create new vertices by taking right side and mirroring to center
-            right_mask = vertices[:, 0] >= x_center
-            center_mask = np.abs(vertices[:, 0] - x_center) < 0.01
-            
-            # Get right-side vertices
-            right_verts = vertices[right_mask]
-            # Create center line vertices
-            y_values = np.unique(vertices[:, 1])
-            center_verts = np.column_stack([np.full(len(y_values), x_center), y_values])
-            
-            # Combine center and right vertices
-            new_vertices = np.vstack([center_verts, right_verts])
-            path.vertices = new_vertices
+    # For 'half_density' style, modify violin plots to be one-sided
+    if plot_style == 'half_density':
+        for collection in violin_plot.collections:
+            # Get all paths in this collection
+            paths = collection.get_paths()
+            for path in paths:
+                vertices = path.vertices.copy()
+                # Find the center x position
+                x_center = np.mean(vertices[:, 0])
+                
+                # Set all x-values on the left side of the center to the center
+                vertices[:, 0][vertices[:, 0] < x_center] = x_center
+                path.vertices = vertices
     
     # Add mean markers for each patient
     colors = plt.cm.viridis(np.linspace(0.1, 0.9, n_patients))
@@ -229,6 +220,7 @@ def create_r0_plot(r0_data: Dict[str, np.ndarray], output_path: Optional[Path] =
     ax.set_ylabel('Basic Reproduction Number (R₀)', fontsize=14)
     ax.set_title('Posterior Distribution of R₀ by Patient', fontsize=16, pad=20)
     ax.grid(True, alpha=0.3, axis='y')
+    ax.set_ylim(0, 60)
     
     # Rotate x-axis labels if needed
     if n_patients > 6:
@@ -297,6 +289,7 @@ def create_r0_plot_violin(r0_data: Dict[str, np.ndarray], output_path: Optional[
     plt.ylabel('Basic Reproduction Number (R₀)', fontsize=14)
     plt.title('Posterior Distribution of R₀ by Patient (Violin Plot)', fontsize=16, pad=20)
     plt.grid(True, alpha=0.3, axis='y')
+    ax.set_ylim(0, 60)
     plt.legend(loc='upper right', fontsize=12)
     
     # Rotate x-axis labels if needed

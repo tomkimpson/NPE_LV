@@ -12,7 +12,7 @@ The script bridges the old JSF TEIRV implementation with the new JSF framework, 
 - Structured output management
 - Batch processing capabilities
 
-Author: Generated for NPE_LV project
+Author: T. Kimpson
 Date: 2025-01-17
 """
 

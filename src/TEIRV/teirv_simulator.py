@@ -108,9 +108,9 @@ def gillespie_teirv(
 
         
         # Calculate reaction propensities
-        # Scale β and φ as in original paper (see tiv.py lines 54-55)
-        a1 = beta * 1e-9 * T * V           # Infection: T + V → E + V
-        a2 = phi * 1e-5 * T * I           # Interferon: T + I → R + I  
+        # Parameters are now pre-scaled in TEIRVPrior.sample()
+        a1 = beta * T * V                  # Infection: T + V → E + V
+        a2 = phi * T * I                  # Interferon: T + I → R + I  
         a3 = rho * R                      # Reversion: R → T
         a4 = k * E                        # Progression: E → I
         a5 = delta * I                    # Cell clearance: I → ∅
@@ -282,15 +282,14 @@ def ode_teirv(
         """
         T, E, I, R, V = y
         
-        # Apply same parameter scaling as Gillespie (lines 111-112 in original)
-        beta_scaled = beta * 1e-9
-        phi_scaled = phi * 1e-5
+        # Parameters are now pre-scaled in TEIRVPrior.sample()
+        # No additional scaling needed
         
         # Differential equations based on reaction system
-        dTdt = rho * R - beta_scaled * T * V - phi_scaled * T * I
-        dEdt = beta_scaled * T * V - k * E
+        dTdt = rho * R - beta * T * V - phi * T * I
+        dEdt = beta * T * V - k * E
         dIdt = k * E - delta * I
-        dRdt = phi_scaled * T * I - rho * R
+        dRdt = phi * T * I - rho * R
         dVdt = pi * I - c * V
         
         return np.array([dTdt, dEdt, dIdt, dRdt, dVdt])

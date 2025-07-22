@@ -24,8 +24,8 @@ class TEIRVPrior(torch.distributions.Distribution):
         
         # Parameter bounds from original paper config file
         self.beta_bounds = (0.0, 20.0)        # β: infection rate
-        self.pi_bounds = (200.0, 600.0)       # π: virion production
-        self.delta_bounds = (1.0, 11.0)       # δ: cell clearance  
+        self.pi_bounds = (200.0, 400.0)       # π: virion production
+        self.delta_bounds = (1.0, 10.0)       # δ: cell clearance  
         self.phi_bounds = (0.0, 15.0)         # φ: interferon protection
         self.rho_bounds = (0.0, 1.0)          # ρ: reversion rate
         self.lnv0_bounds = (0.0, 5.0)         # ln(V₀): log initial virions
@@ -65,28 +65,40 @@ class TEIRVPrior(torch.distributions.Distribution):
         # Transform ln(V₀) to V₀
         v0 = torch.exp(lnv0)
         
-        # Stack parameters: [β, π, δ, φ, ρ, V₀]
+        # Apply explicit scaling transformations to match prior specifications:
+        # β×10^-7 ~ Uniform(0,20) and φ×10^-5 ~ Uniform(0,15)
+        beta_scaled = beta * 1e-7  # β×10^-7 specification
+        phi_scaled = phi * 1e-5    # φ×10^-5 specification
+        
+        # Stack parameters: [β_scaled, π, δ, φ_scaled, ρ, V₀]
         if len(sample_shape) == 0:
-            return torch.stack([beta, pi, delta, phi, rho, v0]).float()
+            return torch.stack([beta_scaled, pi, delta, phi_scaled, rho, v0]).float()
         else:
-            return torch.stack([beta, pi, delta, phi, rho, v0], dim=-1).float()
+            return torch.stack([beta_scaled, pi, delta, phi_scaled, rho, v0], dim=-1).float()
     
     def log_prob(self, value):
         """Compute log probability of parameter values."""
-        # Extract parameters
-        beta, pi, delta, phi, rho, v0 = value.unbind(-1)
+        # Extract scaled parameters (as returned by sample())
+        beta_scaled, pi, delta, phi_scaled, rho, v0 = value.unbind(-1)
         
-        # Compute log probabilities for each parameter
-        log_prob = torch.zeros_like(beta)
+        # 1. Un-scale parameters back to their prior domains
+        beta_unscaled = beta_scaled / 1e-7
+        phi_unscaled = phi_scaled / 1e-5
         
-        # Uniform distributions
-        log_prob += self.beta_dist.log_prob(beta)
+        # 2. Compute log probabilities on original parameter scales
+        log_prob = torch.zeros_like(beta_scaled)
+        log_prob += self.beta_dist.log_prob(beta_unscaled)
         log_prob += self.pi_dist.log_prob(pi)
         log_prob += self.delta_dist.log_prob(delta)
-        log_prob += self.phi_dist.log_prob(phi)
+        log_prob += self.phi_dist.log_prob(phi_unscaled)
         log_prob += self.rho_dist.log_prob(rho)
         
-        # Log-uniform for V₀: p(V₀) = p(ln(V₀)) / V₀
+        # 3. Add Jacobian corrections for scaling transformations
+        # For y = f(x) = a*x, the Jacobian correction is -log(a)
+        log_prob -= torch.log(torch.tensor(1e-7, device=log_prob.device))  # beta scaling
+        log_prob -= torch.log(torch.tensor(1e-5, device=log_prob.device))  # phi scaling
+        
+        # 4. Log-uniform for V₀: p(V₀) = p(ln(V₀)) / V₀  
         lnv0 = torch.log(v0)
         log_prob += self.lnv0_dist.log_prob(lnv0) - lnv0  # Jacobian correction
         
@@ -157,8 +169,8 @@ def create_teirv_prior(device: str = 'cpu') -> TEIRVPrior:
     
     Parameter interpretations:
     - β (infection rate): Uniform(0, 20)
-    - π (virion production): Uniform(200, 600)  
-    - δ (cell clearance): Uniform(1, 11)
+    - π (virion production): Uniform(200, 400)  
+    - δ (cell clearance): Uniform(1, 10)
     - φ (interferon protection): Uniform(0, 15)
     - ρ (reversion rate): Uniform(0, 1)
     - V₀ (initial virions): exp(Uniform(0, 5)) ≈ [1, 148]
@@ -228,7 +240,7 @@ def calculate_r0(posterior_samples: np.ndarray) -> np.ndarray:
     
     Where:
     - π: virion production rate (parameter index 1)
-    - β: infection rate (parameter index 0, scaled by 10⁻⁹)
+    - β: infection rate (parameter index 0, pre-scaled by 10⁻⁷ in prior)
     - T(0): initial target cells = 8×10⁷
     - δ: cell clearance rate (parameter index 2) 
     - c: viral clearance rate = 10.0 (fixed)
@@ -252,11 +264,10 @@ def calculate_r0(posterior_samples: np.ndarray) -> np.ndarray:
     T0 = 8e7    # Initial target cells
     c = 10.0    # Viral clearance rate (fixed in gillespie_teirv)
     
-    # Apply scaling factor for β (as done in gillespie_teirv line 111)
-    beta_scaled = beta * 1e-9
+    # β is now pre-scaled in TEIRVPrior.sample(), no additional scaling needed
     
     # Calculate R₀ = (π × β × T(0)) / (δ × c)
-    r0_samples = (pi * beta_scaled * T0) / (delta * c)
+    r0_samples = (pi * beta * T0) / (delta * c)
     
     return r0_samples
 

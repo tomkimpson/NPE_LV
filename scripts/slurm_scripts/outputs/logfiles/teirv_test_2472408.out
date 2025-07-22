@@ -1,0 +1,129 @@
+==========================================
+TEIRV NPE Parameter Scaling Test
+==========================================
+Job ID: 2472408
+Node: gina1
+Start time: Tue Jul 22 18:01:49 AEST 2025
+Workflow name: test_scaling_20250722_180149
+Training samples: 5000
+Device: cuda
+Max epochs: 200
+Hidden features: 128
+Transforms: 4
+
+🎯 Test Goals:
+  - Verify parameter scaling works correctly
+  - Check that β×10^-7 and φ×10^-5 specifications are respected
+  - Ensure prior bounds: β(0,20), π(200,400), δ(1,10), φ(0,15), ρ(0,1)
+  - Confirm V0 log-scaling: V0 ~ exp(Uniform(0,5))
+==========================================
+Checking CUDA availability...
+CUDA available: True
+CUDA devices: 1
+NVIDIA GPU info:
+Tue Jul 22 18:02:10 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:C1:00.0 Off |                    0 |
+| N/A   25C    P0             59W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+==========================================
+🧪 Running parameter scaling verification test...
+==========================================
+🧪 TEIRV Parameter Scaling Verification
+==================================================
+🔍 Testing Parameter Bounds
+==============================
+✅ beta: (0.0, 20.0)
+✅ pi: (200.0, 400.0)
+✅ delta: (1.0, 10.0)
+✅ phi: (0.0, 15.0)
+✅ rho: (0.0, 1.0)
+✅ v0: (np.float64(1.0), np.float64(148.4131591025766))
+
+Parameter bounds test: PASSED
+
+🔍 Testing Scaling Equivalence
+==============================
+Raw parameter values (pre-scaling):
+β_raw: 5.485
+φ_raw: 4.134
+
+Scaled parameter values (post-scaling):
+β_scaled: 5.485276e-07
+φ_scaled: 4.133530e-05
+
+✅ Simulation successful with new approach
+Final virion count: 4.62e+03
+
+Parameter verification:
+β_effective = 5.485276e-07 (should be ≈ 5.485 × 10^-7 = 5.485276e-07)
+φ_effective = 4.133530e-05 (should be ≈ 4.134 × 10^-5 = 4.133530e-05)
+
+Scaling equivalence test: PASSED
+
+🔍 Testing Prior Sampling
+==============================
+β samples range: [2.288818e-10, 1.997190e-06]
+Expected β range: [0, 2.000000e-06]
+φ samples range: [2.680421e-08, 1.499101e-04]
+Expected φ range: [0, 1.500000e-04]
+π samples range: [200.1, 399.9]
+Expected π range: [200, 400]
+δ samples range: [1.0, 10.0]
+Expected δ range: [1, 10]
+
+Prior sampling test: PASSED
+
+==================================================
+📊 SUMMARY
+==================================================
+Parameter bounds: ✅ PASSED
+Scaling equivalence: ✅ PASSED
+Prior sampling: ✅ PASSED
+
+Overall result: 🎉 ALL TESTS PASSED
+
+✅ The TEIRV workflow is ready for production!
+   - Parameter bounds match specifications exactly
+   - Scaling equivalence is maintained
+   - Prior sampling works correctly
+✅ Parameter scaling test PASSED - proceeding with workflow
+==========================================
+Starting test TEIRV workflow at Tue Jul 22 18:02:22 AEST 2025
+🚀 TEIRV NPE Complete Pipeline
+==================================================
+📁 Workflow directory: workflows/test_scaling_20250722_180149
+📊 Training samples: 5000
+🔧 Device: cuda
+
+🔬 Step 1: Generating training data...
+🔬 TEIRV Training Data Generation
+==================================================
+Samples: 5000
+Simulation timespan: [0, 10.0] days
+Observation grid: 11 points at 1.0-day intervals
+Observation type: RT-PCR only
+RT-PCR noise: 1.0
+Detection limit: -0.65
+Output: workflows/test_scaling_20250722_180149/training_data.pkl
+
+TEIRV Parameter Priors:
+------------------------------
+  β (infection rate):       Uniform(0.0, 20.0)
+  π (virion production):    Uniform(200.0, 400.0)
+  δ (cell clearance):       Uniform(1.0, 10.0)
+  φ (interferon protection): Uniform(0.0, 15.0)
+  ρ (reversion rate):       Uniform(0.0, 1.0)
+  V₀ (initial virions):     exp(Uniform(0.0, 5.0)) ≈ [1, 148]
+
+Starting data generation...

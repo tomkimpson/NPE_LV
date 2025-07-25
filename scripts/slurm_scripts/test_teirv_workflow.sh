@@ -1,8 +1,8 @@
 #!/bin/bash 
 
-#SBATCH --job-name=FIXteirv_test
-#SBATCH --output=outputs/logfiles/FIXteirv_test_%j.out
-#SBATCH --error=outputs/logfiles/FIXteirv_test_%j.err
+#SBATCH --job-name=teirv_test
+#SBATCH --output=outputs/logfiles/teirv_test_%j.out
+#SBATCH --error=outputs/logfiles/teirv_test_%j.err
 #SBATCH --export=ALL 
 #SBATCH --gres=gpu:1
 #SBATCH --time=4:00:00 

@@ -232,7 +232,11 @@ class TEIRVWorkflow:
         # Load NPE model
         print(f"Loading NPE model from {args.model}")
         try:
-            npe_model = TEIRVInference(device=args.device)
+            # Defensive device handling
+            device = getattr(args, 'device', 'cuda' if torch.cuda.is_available() else 'cpu')
+            print(f"Using device: {device}")
+            
+            npe_model = TEIRVInference(device=device)
             npe_model.load_model(args.model)
             print("✅ NPE model loaded successfully")
         except Exception as e:
@@ -642,7 +646,8 @@ class TEIRVWorkflow:
             patients=None,
             min_detections=args.min_detections,
             min_peak_vl=args.min_peak_vl,
-            data_dir=None
+            data_dir=None,
+            device=args.device  # Fix: Add missing device parameter
         )
         
         self.inference(inference_args)

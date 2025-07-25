@@ -1,10 +1,10 @@
 ==========================================
 TEIRV NPE Parameter Scaling Test
 ==========================================
-Job ID: 2473465
-Node: gina17
-Start time: Tue Jul 22 18:20:28 AEST 2025
-Workflow name: test_scaling_20250722_182028
+Job ID: 2544923
+Node: gina1
+Start time: Wed Jul 23 17:12:16 AEST 2025
+Workflow name: test_scaling_20250723_171216
 Training samples: 5000
 Device: cuda
 Max epochs: 200
@@ -21,7 +21,7 @@ Checking CUDA availability...
 CUDA available: True
 CUDA devices: 1
 NVIDIA GPU info:
-Tue Jul 22 18:20:52 2025       
+Wed Jul 23 17:14:13 2025       
 +-----------------------------------------------------------------------------------------+
 | NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
 |-----------------------------------------+------------------------+----------------------+
@@ -29,8 +29,8 @@ Tue Jul 22 18:20:52 2025
 | Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
 |                                         |                        |               MIG M. |
 |=========================================+========================+======================|
-|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:41:00.0 Off |                    0 |
-| N/A   26C    P0             62W /  500W |       0MiB /  81920MiB |      0%      Default |
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:C1:00.0 Off |                    0 |
+| N/A   25C    P0             59W /  500W |       0MiB /  81920MiB |      0%      Default |
 |                                         |                        |             Disabled |
 +-----------------------------------------+------------------------+----------------------+
                                                                                          
@@ -55,29 +55,29 @@ Parameter bounds test: PASSED
 🔍 Testing Scaling Equivalence
 ==============================
 Raw parameter values (pre-scaling):
-β_raw: 10.368
-φ_raw: 8.427
+β_raw: 8.832
+φ_raw: 3.974
 
 Scaled parameter values (post-scaling):
-β_scaled: 1.036833e-06
-φ_scaled: 8.427339e-05
+β_scaled: 8.832257e-07
+φ_scaled: 3.974405e-05
 
 ✅ Simulation successful with new approach
-Final virion count: 3.88e+03
+Final virion count: 4.48e+03
 
 Parameter verification:
-β_effective = 1.036833e-06 (should be ≈ 10.368 × 10^-7 = 1.036833e-06)
-φ_effective = 8.427339e-05 (should be ≈ 8.427 × 10^-5 = 8.427339e-05)
+β_effective = 8.832257e-07 (should be ≈ 8.832 × 10^-7 = 8.832257e-07)
+φ_effective = 3.974405e-05 (should be ≈ 3.974 × 10^-5 = 3.974405e-05)
 
 Scaling equivalence test: PASSED
 
 🔍 Testing Prior Sampling
 ==============================
-β samples range: [4.981756e-10, 1.997239e-06]
+β samples range: [3.000021e-09, 1.999498e-06]
 Expected β range: [0, 2.000000e-06]
-φ samples range: [9.288490e-08, 1.497507e-04]
+φ samples range: [3.244489e-07, 1.499639e-04]
 Expected φ range: [0, 1.500000e-04]
-π samples range: [200.3, 400.0]
+π samples range: [200.0, 400.0]
 Expected π range: [200, 400]
 δ samples range: [1.0, 10.0]
 Expected δ range: [1, 10]
@@ -99,10 +99,10 @@ Overall result: 🎉 ALL TESTS PASSED
    - Prior sampling works correctly
 ✅ Parameter scaling test PASSED - proceeding with workflow
 ==========================================
-Starting test TEIRV workflow at Tue Jul 22 18:21:06 AEST 2025
+Starting test TEIRV workflow at Wed Jul 23 17:15:10 AEST 2025
 🚀 TEIRV NPE Complete Pipeline
 ==================================================
-📁 Workflow directory: workflows/test_scaling_20250722_182028
+📁 Workflow directory: workflows/test_scaling_20250723_171216
 📊 Training samples: 5000
 🔧 Device: cuda
 
@@ -115,7 +115,7 @@ Observation grid: 11 points at 1.0-day intervals
 Observation type: RT-PCR only
 RT-PCR noise: 1.0
 Detection limit: -0.65
-Output: workflows/test_scaling_20250722_182028/training_data.pkl
+Output: workflows/test_scaling_20250723_171216/training_data.pkl
 
 TEIRV Parameter Priors:
 ------------------------------
@@ -128,19 +128,19 @@ TEIRV Parameter Priors:
 
 Starting data generation...
 Generated 5000/5000 valid samples (0 failed)
-Saved TEIRV data to workflows/test_scaling_20250722_182028/training_data.pkl
+Saved TEIRV data to workflows/test_scaling_20250723_171216/training_data.pkl
 Data shapes: theta=torch.Size([5000, 6]), x=torch.Size([5000, 10])
 
 ✅ DATA GENERATION COMPLETED
-⏱️  Generation time: 2163.7 seconds
+⏱️  Generation time: 4629.5 seconds
 📊 Generated 5000 valid samples
-⚡ Generation rate: 2.3 samples/second
+⚡ Generation rate: 1.1 samples/second
 
 🧠 Step 2: Training NPE model...
 🧠 TEIRV NPE Model Training
 ==================================================
-Data: workflows/test_scaling_20250722_182028/training_data.pkl
-Output: workflows/test_scaling_20250722_182028/npe_model.pkl
+Data: workflows/test_scaling_20250723_171216/training_data.pkl
+Output: workflows/test_scaling_20250723_171216/npe_model.pkl
 Device: cuda
 
 ✅ Loaded 5000 training samples
@@ -183,46 +183,168 @@ Observation type: rt_pcr
    • v0: mean=28.738, std=35.699
    • Posterior quality assessed with 2000 samples
    • Model ready for clinical inference
-Saved TEIRV model to workflows/test_scaling_20250722_182028/npe_model.pkl
+Saved TEIRV model to workflows/test_scaling_20250723_171216/npe_model.pkl
 
 ✅ TRAINING COMPLETED
-⏱️  Training time: 92.9 seconds
-📁 Model saved to workflows/test_scaling_20250722_182028/npe_model.pkl
+⏱️  Training time: 275.7 seconds
+📁 Model saved to workflows/test_scaling_20250723_171216/npe_model.pkl
 
 🏥 Step 3: Running inference...
 🏥 TEIRV Inference
 ==================================================
-Loading NPE model from workflows/test_scaling_20250722_182028/npe_model.pkl
-❌ Failed to load NPE model: 'Namespace' object has no attribute 'device'
-==========================================
-Test workflow completed at Tue Jul 22 18:59:50 AEST 2025
-Exit code: 1
-❌ TEST WORKFLOW FAILED with exit code 1
-🚨 Parameter scaling may have issues - check logs before production
+Loading NPE model from workflows/test_scaling_20250723_171216/npe_model.pkl
+Using device: cuda
+Loaded TEIRV model from workflows/test_scaling_20250723_171216/npe_model.pkl
+✅ NPE model loaded successfully
 
-Check the log files for details:
-  - Standard output: outputs/logfiles/teirv_test_2473465.out
-  - Standard error: outputs/logfiles/teirv_test_2473465.err
+Loading clinical data...
+Found 6 patient datasets: ['443108', '445602', '444391', '444332', '432192', '451152']
+Loaded patient 443108: 14 timepoints
+Loaded patient 445602: 14 timepoints
+Loaded patient 444391: 14 timepoints
+Loaded patient 444332: 14 timepoints
+Loaded patient 432192: 14 timepoints
+Loaded patient 451152: 14 timepoints
+✅ Found 6 patients
+Filtered 6/6 patients meeting criteria
+✅ Processing 6 patients
+Prepared patient 443108: torch.Size([10])
+Prepared patient 445602: torch.Size([10])
+Prepared patient 444391: torch.Size([10])
+Prepared patient 444332: torch.Size([10])
+Prepared patient 432192: torch.Size([10])
+Prepared patient 451152: torch.Size([10])
+
+Performing NPE inference (2000 samples per patient)...
+
+Processing patient 443108
+  ✅ Completed in 1.67s
+
+Processing patient 445602
+  ✅ Completed in 0.02s
+
+Processing patient 444391
+  ✅ Completed in 0.02s
+
+Processing patient 444332
+  ✅ Completed in 0.02s
+
+Processing patient 432192
+  ✅ Completed in 0.02s
+
+Processing patient 451152
+  ✅ Completed in 0.02s
+Creating corner plot for patient 443108
+  ✅ Corner plot saved
+Creating predictive plot for patient 443108
+  Generating prediction using posterior mean...
+    Using posterior mean: [ 1.1829521e-06  3.3612897e+02  5.5177231e+00 -8.8900897e-06
+  6.2414378e-01  1.7264294e+01]
+  ✅ Generated posterior mean prediction in 10.6s
+  ✅ Predictive plot saved
+Creating corner plot for patient 445602
+  ✅ Corner plot saved
+Creating predictive plot for patient 445602
+  Generating prediction using posterior mean...
+    Using posterior mean: [1.0535986e-06 3.2429694e+02 5.6368556e+00 1.0374454e-05 6.0871202e-01
+ 2.2909075e+01]
+  ✅ Generated posterior mean prediction in 10.3s
+  ✅ Predictive plot saved
+Creating corner plot for patient 444391
+  ✅ Corner plot saved
+Creating predictive plot for patient 444391
+  Generating prediction using posterior mean...
+    Using posterior mean: [ 1.2351450e-06  3.4117508e+02  5.8099370e+00 -1.3740372e-05
+  6.0491496e-01  1.7652105e+01]
+  ✅ Generated posterior mean prediction in 10.6s
+  ✅ Predictive plot saved
+Creating corner plot for patient 444332
+  ✅ Corner plot saved
+Creating predictive plot for patient 444332
+  Generating prediction using posterior mean...
+    Using posterior mean: [ 1.2295291e-06  3.4057724e+02  6.2063866e+00 -1.0774256e-05
+  5.9151590e-01  1.8506966e+01]
+  ✅ Generated posterior mean prediction in 10.6s
+  ✅ Predictive plot saved
+Creating corner plot for patient 432192
+  ✅ Corner plot saved
+Creating predictive plot for patient 432192
+  Generating prediction using posterior mean...
+    Using posterior mean: [9.1025129e-07 3.2154965e+02 5.8029537e+00 1.2714725e-05 6.3033187e-01
+ 2.0622776e+01]
+  ✅ Generated posterior mean prediction in 10.7s
+  ✅ Predictive plot saved
+Creating corner plot for patient 451152
+  ✅ Corner plot saved
+Creating predictive plot for patient 451152
+  Generating prediction using posterior mean...
+    Using posterior mean: [1.0425448e-06 3.2698685e+02 5.7162652e+00 4.3333362e-06 5.6226796e-01
+ 2.6246946e+01]
+  ✅ Generated posterior mean prediction in 10.7s
+  ✅ Predictive plot saved
+
+✅ CLINICAL INFERENCE COMPLETED
+⏱️  Total time: 1.79 seconds
+📁 Results saved to workflows/test_scaling_20250723_171216/inference_results
+
+🎉 COMPLETE PIPELINE FINISHED
+⏱️  Total time: 5009.8 seconds (83.5 minutes)
+📁 All results in: workflows/test_scaling_20250723_171216
+==========================================
+Test workflow completed at Wed Jul 23 18:42:15 AEST 2025
+Exit code: 0
+✅ TEST WORKFLOW COMPLETED SUCCESSFULLY
+📁 Results available in: workflows/test_scaling_20250723_171216
+
+🔍 Quick Results Validation:
+----------------------------------------
+✅ Training data generated successfully
+✅ NPE model trained successfully
+✅ Clinical inference completed successfully
+
+📊 Parameter Estimates Preview:
+----------------------------------------
+patient_id,β_mean,β_q025,β_q975,π_mean,π_q025,π_q975,δ_mean,δ_q025,δ_q975,φ_mean,φ_q025,φ_q975,ρ_mean,ρ_q025,ρ_q975,V₀_mean,V₀_q025,V₀_q975,inference_time,n_samples
+443108,1.182952e-06,1.44039e-07,2.0097282e-06,336.129,211.33905,396.5366,5.5177226,1.573379,10.086484,-8.89009e-06,-1.3839354e-05,-2.556834e-06,0.6241438,0.026430644,1.0078113,17.264296,0.51192886,141.62683,1.6729764938354492,2000
+445602,1.0535986e-06,8.410379e-08,1.986956e-06,324.29697,208.36975,396.01508,5.636856,1.3999827,9.9684925,1.0374453e-05,-3.9958654e-06,7.062782e-05,0.608712,0.030986244,0.99824214,22.909077,1.1242118,138.10628,0.01717686653137207,2000
+----------------------------------------
+ℹ️  Parameter interpretation:
+  - β_mean: infection rate (should be ≈ raw_β × 10^-7)
+  - φ_mean: interferon protection (should be ≈ raw_φ × 10^-5)
+  - π_mean: virion production (200-400 range)
+  - δ_mean: cell clearance (1-10 range)
+  - V₀_mean: initial virions (exp-distributed)
+
+Generated files:
+total 7430
+drwxr-sr-x  3 tkimpson oz022   11776 Jul 23 18:40 .
+drwxr-sr-x 14 tkimpson oz022   12800 Jul 23 17:18 ..
+drwxr-sr-x  8 tkimpson oz022   11776 Jul 23 18:42 inference_results
+-rw-r--r--  1 tkimpson oz022 8527190 Jul 23 18:40 npe_model.pkl
+-rw-r--r--  1 tkimpson oz022  321241 Jul 23 18:35 training_data.pkl
+
+🎉 TEST COMPLETED - Parameter scaling verification successful!
+Ready for production runs with full parameters.
 ==========================================
 📋 TEST SUMMARY:
   Parameter scaling test: 0
-  Full workflow test: 1
-  Overall status: ❌ NEEDS DEBUGGING
+  Full workflow test: 0
+  Overall status: ✅ READY FOR PRODUCTION
 ==========================================
 
-+------------------ Job Report: 2473465 (COMPLETED) -------------------+
-| Memory (RAM)  [####                ] 22.4% (1.8 GB peak / 8 GB)      |
-| CPU           [#########           ] 46.1% average                   |
-| GPU           [                    ]  0.3% average                   |
-| Time          [--->                ] 16.6% (0-00:39:44 / 0-04:00:00) |
++------------------ Job Report: 2544923 (COMPLETED) -------------------+
+| Memory (RAM)  [####                ] 22.9% (1.8 GB peak / 8 GB)      |
+| CPU           [########            ] 43.4% average                   |
+| GPU           [                    ]  0.4% average                   |
+| Time          [------->            ] 37.8% (0-01:30:50 / 0-04:00:00) |
 |                                                                      |
 | Lustre Filesystem:                                                   |
 |   Path    Total Read    Total Write    Total IOPS                    |
 |   ------  ------------  -------------  ------------                  |
-|   /apps   796 KB        0 B            16                            |
-|   /fred   609.9 MB      349.3 KB       24.3 K                        |
-|   /home   27.4 MB       0 B            12                            |
-|   OS      4 KB          0 B            13                            |
+|   /apps   0 B           0 B            712                           |
+|   /fred   841.7 MB      13.4 MB        28.7 K                        |
+|   /home   27.4 MB       0 B            20                            |
+|   OS      964 KB        0 B            21                            |
 |                                                                      |
 | Warnings:                                                            |
 |   - Too much memory requested                                        |

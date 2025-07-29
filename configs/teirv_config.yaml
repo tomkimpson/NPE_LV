@@ -158,3 +158,14 @@ system:
   progress:
     show_progress_bar: true    # Show tqdm progress bar
     log_every_n_batches: 10   # Log progress every N batches
+
+# SLURM configuration
+slurm:
+  job_name: teirv_workflow_full
+  output: results/experiments/slurm_outputs/logfiles/teirv_workflow_%j.out
+  error: results/experiments/slurm_outputs/logfiles/teirv_workflow_%j.err
+  export: ALL
+  gres: gpu:1
+  time: "36:00:00"
+  mem: 16G
+  cpus_per_task: 4

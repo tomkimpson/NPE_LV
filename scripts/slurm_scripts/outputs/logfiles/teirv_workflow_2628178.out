@@ -64,3 +64,22 @@ TEIRV Parameter Priors:
   V₀ (initial virions):     exp(Uniform(0.0, 5.0)) ≈ [1, 148]
 
 Starting data generation...
+
++-------------------- Job Report: 2628178 (TIMEOUT) --------------------+
+| Memory (RAM)  [#                   ]  5.7% (938.5 MB peak / 16 GB)    |
+| CPU           [####                ] 24.3% average                    |
+| GPU           [                    ]  0.0% average                    |
+| Time          [------------------->] 100.0% (1-00:00:06 / 1-00:00:00) |
+|                                                                       |
+| Lustre Filesystem:                                                    |
+|   Path    Total Read    Total Write    Total IOPS                     |
+|   ------  ------------  -------------  ------------                   |
+|   /fred   1.1 GB        424.5 KB       18.4 K                         |
+|   /home   27.4 MB       0 B            12                             |
+|   OS      0 B           0 B            8                              |
+|                                                                       |
+| Warnings:                                                             |
+|   - Too much memory requested                                         |
+|   - CPU usage is low                                                  |
+|   - GPU usage is low                                                  |
++-----------------------------------------------------------------------+

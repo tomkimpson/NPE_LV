@@ -12,31 +12,43 @@
 # TEIRV NPE Full Workflow SLURM Script
 # 
 # This script runs the complete TEIRV NPE pipeline:
-# 1. Generate training data (50,000 samples, 10-day trajectories)
+# 1. Generate training data using unified config
 # 2. Train NPE model on GPU
-# 3. Run inference on clinical patient data with 10-20 day predictions
+# 3. Run inference on clinical patient data
 #
-# Usage: sbatch scripts/slurm_scripts/run_teirv_workflow.sh
+# Usage: sbatch scripts/slurm/run_teirv_workflow.sh <path_to_config.yaml>
 #
-# Modify the parameters below as needed:
+# All parameters are defined in the provided config file
 
-# Workflow parameters
-N_SAMPLES=50000              # Reduced training samples for faster completion
+# Check if a config file is provided
+if [ -z "$1" ]; then
+  echo "Error: No config file provided."
+  echo "Usage: sbatch scripts/slurm/run_teirv_workflow.sh <path_to_config.yaml>"
+  exit 1
+fi
+
+CONFIG_FILE="$1"
+
+# Check if config file exists
+if [ ! -f "$CONFIG_FILE" ]; then
+  echo "Error: Config file '$CONFIG_FILE' not found."
+  exit 1
+fi
+
+# Workflow name (only parameter not in config)
 WORKFLOW_NAME="production_run_$(date +%Y%m%d_%H%M%S)"
-DEVICE="cuda"                # Use GPU for training
-# NOTE: Uses t_max=10.0 days by default (training on early infection dynamics)
-MAX_EPOCHS=1000              # Extended training epochs for better convergence
-HIDDEN_FEATURES=512          # Larger neural network for better expressivity
-NUM_TRANSFORMS=12            # More transforms for better posterior approximation
 
-# Training parameters
-TRAIN_BATCH_SIZE=512         # Training batch size
-LEARNING_RATE=5e-4           # Learning rate
-INFERENCE_SAMPLES=20000      # Posterior samples for inference
-
-# Clinical filtering
-MIN_DETECTIONS=5             # Minimum detections for patient inclusion
-MIN_PEAK_VL=2.0             # Minimum peak viral load
+# Extract key parameters from config for display (using Python)
+eval $(python -c "
+import yaml
+with open('$CONFIG_FILE', 'r') as f:
+    config = yaml.safe_load(f)
+print(f'N_SAMPLES={config[\"data\"][\"generation\"][\"n_samples\"]}')
+print(f'DEVICE={config[\"system\"][\"device\"]}')
+print(f'MAX_EPOCHS={config[\"training\"][\"max_num_epochs\"]}')
+print(f'HIDDEN_FEATURES={config[\"network\"][\"hidden_features\"]}')
+print(f'NUM_TRANSFORMS={config[\"network\"][\"num_transforms\"]}')
+")
 
 echo "=========================================="
 echo "TEIRV NPE Full Workflow"
@@ -44,6 +56,8 @@ echo "=========================================="
 echo "Job ID: $SLURM_JOB_ID"
 echo "Node: $SLURMD_NODENAME" 
 echo "Start time: $(date)"
+echo "Config file: $CONFIG_FILE"
+echo "Config file exists: $([ -f "$CONFIG_FILE" ] && echo "✅ Yes" || echo "❌ No")"
 echo "Workflow name: $WORKFLOW_NAME"
 echo "Training samples: $N_SAMPLES"
 echo "Device: $DEVICE"
@@ -72,22 +86,12 @@ fi
 # Change to project directory
 cd /fred/oz022/tkimpson/NPE_LV
 
-# Run the complete TEIRV workflow
+# Run the complete TEIRV workflow using config file
 echo "Starting TEIRV workflow at $(date)"
 
-time python -u src/main.py \
-    --device $DEVICE \
-    full \
-    --workflow_name "$WORKFLOW_NAME" \
-    --n_samples $N_SAMPLES \
-    --max_epochs $MAX_EPOCHS \
-    --hidden_features $HIDDEN_FEATURES \
-    --num_transforms $NUM_TRANSFORMS \
-    --train_batch_size $TRAIN_BATCH_SIZE \
-    --learning_rate $LEARNING_RATE \
-    --inference_samples $INFERENCE_SAMPLES \
-    --min_detections $MIN_DETECTIONS \
-    --min_peak_vl $MIN_PEAK_VL
+echo "Command: python -u src/main.py full --config $CONFIG_FILE --workflow_name $WORKFLOW_NAME"
+
+time python -u src/main.py full --config $CONFIG_FILE --workflow_name "$WORKFLOW_NAME"
 
 WORKFLOW_EXIT_CODE=$?
 

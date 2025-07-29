@@ -23,6 +23,8 @@ import numpy as np
 import pandas as pd
 import torch
 import matplotlib.pyplot as plt
+import yaml
+import shutil
 from pathlib import Path
 from datetime import datetime
 from typing import Dict, List, Tuple, Optional, Any
@@ -599,12 +601,98 @@ class TEIRVWorkflow:
         print(f"\n✅ DEMO COMPLETED")
         print(f"📁 All results in: {demo_dir}")
     
+    def load_config(self, config_path: str) -> Dict:
+        """Load configuration from YAML file."""
+        try:
+            with open(config_path, 'r') as f:
+                config = yaml.safe_load(f)
+            print(f"✅ Loaded config from {config_path}")
+            return config
+        except Exception as e:
+            print(f"❌ Error loading config file {config_path}: {e}")
+            sys.exit(1)
+    
+    def merge_config_args(self, config: Dict, args: argparse.Namespace) -> argparse.Namespace:
+        """Merge config file values with CLI arguments. CLI args take precedence."""
+        # Create a copy of args to avoid modifying the original
+        merged_args = argparse.Namespace(**vars(args))
+        
+        # Data generation parameters
+        if 'data' in config:
+            data_config = config['data']
+            if not hasattr(args, 'batch_size') or args.batch_size == 1000:  # default value
+                merged_args.batch_size = data_config.get('generation', {}).get('batch_size', args.batch_size)
+            if not hasattr(args, 't_max') or args.t_max == 10.0:
+                merged_args.t_max = data_config.get('simulation', {}).get('t_max', args.t_max)
+            if not hasattr(args, 'dt') or args.dt == 1.0:
+                merged_args.dt = data_config.get('simulation', {}).get('dt', args.dt)
+            if not hasattr(args, 'observation_noise') or args.observation_noise == 1.0:
+                merged_args.observation_noise = data_config.get('observation', {}).get('noise_std', args.observation_noise)
+            if not hasattr(args, 'detection_limit') or args.detection_limit == -0.65:
+                merged_args.detection_limit = data_config.get('observation', {}).get('detection_limit', args.detection_limit)
+        
+        # Training parameters
+        if 'training' in config:
+            training_config = config['training']
+            if not hasattr(args, 'train_batch_size') or args.train_batch_size == 512:
+                merged_args.train_batch_size = training_config.get('batch_size', args.train_batch_size)
+            if not hasattr(args, 'learning_rate') or args.learning_rate == 5e-4:
+                merged_args.learning_rate = training_config.get('learning_rate', args.learning_rate)
+            if not hasattr(args, 'max_epochs') or args.max_epochs == 1000:
+                merged_args.max_epochs = training_config.get('max_num_epochs', args.max_epochs)
+            if not hasattr(args, 'validation_fraction') or args.validation_fraction == 0.15:
+                merged_args.validation_fraction = training_config.get('validation_fraction', args.validation_fraction)
+            if not hasattr(args, 'early_stopping') or args.early_stopping == 100:
+                merged_args.early_stopping = training_config.get('stop_after_epochs', args.early_stopping)
+        
+        # Network parameters
+        if 'network' in config:
+            network_config = config['network']
+            if not hasattr(args, 'hidden_features') or args.hidden_features == 512:
+                merged_args.hidden_features = network_config.get('hidden_features', args.hidden_features)
+            if not hasattr(args, 'num_transforms') or args.num_transforms == 12:
+                merged_args.num_transforms = network_config.get('num_transforms', args.num_transforms)
+        
+        # System parameters
+        if 'system' in config:
+            system_config = config['system']
+            if not hasattr(args, 'device') or args.device == 'cpu':
+                merged_args.device = system_config.get('device', args.device)
+        
+        # Inference parameters
+        if 'inference' in config:
+            inference_config = config['inference']
+            if not hasattr(args, 'inference_samples') or args.inference_samples == 10000:
+                merged_args.inference_samples = inference_config.get('n_samples', args.inference_samples)
+            if not hasattr(args, 'min_detections') or args.min_detections == 5:
+                merged_args.min_detections = inference_config.get('min_detections', args.min_detections)
+            if not hasattr(args, 'min_peak_vl') or args.min_peak_vl == 2.0:
+                merged_args.min_peak_vl = inference_config.get('min_peak_viral_load', args.min_peak_vl)
+        
+        return merged_args
+    
     def full_pipeline(self, args):
         """Run complete end-to-end pipeline."""
         print("🚀 TEIRV NPE Complete Pipeline")
         print("=" * 50)
         
+        # Load and merge config if provided
+        config_file_path = None
+        if hasattr(args, 'config') and args.config is not None:
+            config_file_path = args.config
+            config = self.load_config(args.config)
+            args = self.merge_config_args(config, args)
+        
         workflow_dir = self.setup_workflow_directory(args.workflow_name)
+        
+        # Copy config file to workflow directory for reproducibility
+        if config_file_path is not None:
+            try:
+                config_dest = workflow_dir / "config_used.yaml"
+                shutil.copy2(config_file_path, config_dest)
+                print(f"📋 Config file copied to: {config_dest}")
+            except Exception as e:
+                print(f"⚠️  Warning: Could not copy config file: {e}")
         
         print(f"📁 Workflow directory: {workflow_dir}")
         print(f"📊 Training samples: {args.n_samples}")
@@ -754,6 +842,7 @@ Examples:
     full_parser.add_argument('--num_transforms', type=int, default=12, help='Number of transforms')
     full_parser.add_argument('--min_detections', type=int, default=5, help='Min detections')
     full_parser.add_argument('--min_peak_vl', type=float, default=2.0, help='Min peak viral load')
+    full_parser.add_argument('--config', type=str, default=None, help='Config file path (YAML). CLI args override config values.')
     
     args = parser.parse_args()
     

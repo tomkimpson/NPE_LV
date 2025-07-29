@@ -5,7 +5,7 @@
 #SBATCH --error=outputs/logfiles/teirv_workflow_%j.err
 #SBATCH --export=ALL 
 #SBATCH --gres=gpu:1
-#SBATCH --time=24:00:00 
+#SBATCH --time=36:00:00 
 #SBATCH --mem=16G
 #SBATCH --cpus-per-task=4
 
@@ -21,7 +21,7 @@
 # Modify the parameters below as needed:
 
 # Workflow parameters
-N_SAMPLES=200000             # Enhanced training samples for better convergence
+N_SAMPLES=50000              # Reduced training samples for faster completion
 WORKFLOW_NAME="production_run_$(date +%Y%m%d_%H%M%S)"
 DEVICE="cuda"                # Use GPU for training
 # NOTE: Uses t_max=10.0 days by default (training on early infection dynamics)

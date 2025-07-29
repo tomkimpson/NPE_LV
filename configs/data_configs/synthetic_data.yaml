@@ -1,0 +1,35 @@
+# Synthetic Data Generation Configuration
+
+# Training data generation
+training_data:
+  n_samples: 5000           # Number of training samples
+  batch_size: 500           # Batch size for generation
+  output_file: data/processed/training_data.pkl
+  
+# Validation data generation  
+validation_data:
+  n_samples: 1000           # Number of validation samples
+  batch_size: 200           # Batch size for generation
+  output_file: data/processed/validation_data.pkl
+
+# Test data generation
+test_data:
+  n_samples: 500            # Number of test samples
+  batch_size: 100           # Batch size for generation
+  output_file: data/processed/test_data.pkl
+
+# Data generation settings
+generation:
+  seed: 42                  # Random seed for reproducibility
+  success_rate_threshold: 0.95  # Minimum simulation success rate
+  max_attempts: 3           # Max attempts for batch generation
+  
+# Parallel processing
+parallel:
+  use_multiprocessing: false  # Enable multiprocessing
+  n_workers: 4               # Number of worker processes
+
+# Progress tracking
+progress:
+  show_progress_bar: true    # Show tqdm progress bar
+  log_every_n_batches: 10   # Log progress every N batches

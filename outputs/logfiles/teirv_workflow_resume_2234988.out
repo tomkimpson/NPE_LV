@@ -1,224 +1,0 @@
-==========================================
-TEIRV NPE Resume Workflow
-==========================================
-Job ID: 2234988
-Node: gina17
-Start time: Mon Jul 14 15:24:16 AEST 2025
-Workflow name: resume_run_20250714_152416
-Using existing data: workflows/production_run_20250709_144328/training_data.pkl
-Device: cuda
-Max epochs: 1000
-Hidden features: 512
-Transforms: 12
-==========================================
-Checking CUDA availability...
-CUDA available: True
-CUDA devices: 1
-NVIDIA GPU info:
-Mon Jul 14 15:25:49 2025       
-+-----------------------------------------------------------------------------------------+
-| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
-|-----------------------------------------+------------------------+----------------------+
-| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
-| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
-|                                         |                        |               MIG M. |
-|=========================================+========================+======================|
-|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:01:00.0 Off |                    0 |
-| N/A   27C    P0             63W /  500W |       0MiB /  81920MiB |      0%      Default |
-|                                         |                        |             Disabled |
-+-----------------------------------------+------------------------+----------------------+
-                                                                                         
-+-----------------------------------------------------------------------------------------+
-| Processes:                                                                              |
-|  GPU   GI   CI              PID   Type   Process name                        GPU Memory |
-|        ID   ID                                                               Usage      |
-|=========================================================================================|
-|  No running processes found                                                             |
-+-----------------------------------------------------------------------------------------+
-==========================================
-✅ Found existing training data: workflows/production_run_20250709_144328/training_data.pkl
-📊 Training data size:
-  - Parameter samples: torch.Size([200000, 6])
-  - Observations: torch.Size([200000, 11])
-🧠 Step 1: Training NPE model at Mon Jul 14 15:25:52 AEST 2025
-🧠 TEIRV NPE Model Training
-==================================================
-Data: workflows/production_run_20250709_144328/training_data.pkl
-Output: workflows/resume_run_20250714_152416/npe_model.pkl
-Device: cuda
-
-✅ Loaded 200000 training samples
-Parameter shape: torch.Size([200000, 6])
-Observation shape: torch.Size([200000, 11])
-Observation type: rt_pcr
-Starting training...
-Training TEIRV NPE with 200000 samples...
-Parameter shape: torch.Size([200000, 6])
-Observation shape: torch.Size([200000, 11])
-Observation type: rt_pcr
-🎯 Enhanced Training Configuration:
-   • Max epochs: 1000
-   • Early stopping patience: 100
-   • Learning rate: 0.0005
-   • Learning rate scheduler: True
-   • Training batch size: 512
-   • Validation fraction: 0.15
-   • LR scheduler: ReduceLROnPlateau (display only - not yet supported)
- Training neural network. Epochs trained: 1 Training neural network. Epochs trained: 2 Training neural network. Epochs trained: 3 Training neural network. Epochs trained: 4 Training neural network. Epochs trained: 5 Training neural network. Epochs trained: 6 Training neural network. Epochs trained: 7 Training neural network. Epochs trained: 8 Training neural network. Epochs trained: 9 Training neural network. Epochs trained: 10 Training neural network. Epochs trained: 11 Training neural network. Epochs trained: 12 Training neural network. Epochs trained: 13 Training neural network. Epochs trained: 14 Training neural network. Epochs trained: 15 Training neural network. Epochs trained: 16 Training neural network. Epochs trained: 17 Training neural network. Epochs trained: 18 Training neural network. Epochs trained: 19 Training neural network. Epochs trained: 20 Training neural network. Epochs trained: 21 Training neural network. Epochs trained: 22 Training neural network. Epochs trained: 23 Training neural network. Epochs trained: 24 Training neural network. Epochs trained: 25 Training neural network. Epochs trained: 26 Training neural network. Epochs trained: 27 Training neural network. Epochs trained: 28 Training neural network. Epochs trained: 29 Training neural network. Epochs trained: 30 Training neural network. Epochs trained: 31 Training neural network. Epochs trained: 32 Training neural network. Epochs trained: 33 Training neural network. Epochs trained: 34 Training neural network. Epochs trained: 35 Training neural network. Epochs trained: 36 Training neural network. Epochs trained: 37 Training neural network. Epochs trained: 38 Training neural network. Epochs trained: 39 Training neural network. Epochs trained: 40 Training neural network. Epochs trained: 41 Training neural network. Epochs trained: 42 Training neural network. Epochs trained: 43 Training neural network. Epochs trained: 44 Training neural network. Epochs trained: 45 Training neural network. Epochs trained: 46 Training neural network. Epochs trained: 47 Training neural network. Epochs trained: 48 Training neural network. Epochs trained: 49 Training neural network. Epochs trained: 50 Training neural network. Epochs trained: 51 Training neural network. Epochs trained: 52 Training neural network. Epochs trained: 53 Training neural network. Epochs trained: 54 Training neural network. Epochs trained: 55 Training neural network. Epochs trained: 56 Training neural network. Epochs trained: 57 Training neural network. Epochs trained: 58 Training neural network. Epochs trained: 59 Training neural network. Epochs trained: 60 Training neural network. Epochs trained: 61 Training neural network. Epochs trained: 62 Training neural network. Epochs trained: 63 Training neural network. Epochs trained: 64 Training neural network. Epochs trained: 65 Training neural network. Epochs trained: 66 Training neural network. Epochs trained: 67 Training neural network. Epochs trained: 68 Training neural network. Epochs trained: 69 Training neural network. Epochs trained: 70 Training neural network. Epochs trained: 71 Training neural network. Epochs trained: 72 Training neural network. Epochs trained: 73 Training neural network. Epochs trained: 74 Training neural network. Epochs trained: 75 Training neural network. Epochs trained: 76 Training neural network. Epochs trained: 77 Training neural network. Epochs trained: 78 Training neural network. Epochs trained: 79 Training neural network. Epochs trained: 80 Training neural network. Epochs trained: 81 Training neural network. Epochs trained: 82 Training neural network. Epochs trained: 83 Training neural network. Epochs trained: 84 Training neural network. Epochs trained: 85 Training neural network. Epochs trained: 86 Training neural network. Epochs trained: 87 Training neural network. Epochs trained: 88 Training neural network. Epochs trained: 89 Training neural network. Epochs trained: 90 Training neural network. Epochs trained: 91 Training neural network. Epochs trained: 92 Training neural network. Epochs trained: 93 Training neural network. Epochs trained: 94 Training neural network. Epochs trained: 95 Training neural network. Epochs trained: 96 Training neural network. Epochs trained: 97 Training neural network. Epochs trained: 98 Training neural network. Epochs trained: 99 Training neural network. Epochs trained: 100 Training neural network. Epochs trained: 101 Training neural network. Epochs trained: 102 Training neural network. Epochs trained: 103 Training neural network. Epochs trained: 104 Training neural network. Epochs trained: 105 Training neural network. Epochs trained: 106 Training neural network. Epochs trained: 107 Neural network successfully converged after 107 epochs.
-        -------------------------
-        ||||| ROUND 1 STATS |||||:
-        -------------------------
-        Epochs trained: 107
-        Best validation performance: 17.2761
-        -------------------------
-        
-📊 Training completed successfully!
-   • Training epochs: Completed with early stopping
-   • Training batch size: 512
-   • Learning rate: 0.0005
-   • Max epochs: 1000
-📊 Assessing posterior quality with 2000 samples...
-📈 Prior parameter statistics:
-   • beta: mean=9.945, std=5.787
-   • pi: mean=398.224, std=116.339
-   • delta: mean=5.872, std=2.877
-   • phi: mean=7.393, std=4.348
-   • rho: mean=0.502, std=0.285
-   • v0: mean=28.738, std=35.699
-   • Posterior quality assessed with 2000 samples
-   • Model ready for clinical inference
-Saved TEIRV model to workflows/resume_run_20250714_152416/npe_model.pkl
-
-✅ TRAINING COMPLETED
-⏱️  Training time: 3525.2 seconds
-📁 Model saved to workflows/resume_run_20250714_152416/npe_model.pkl
-✅ Training completed successfully
-🏥 Step 2: Running inference at Mon Jul 14 16:28:37 AEST 2025
-🏥 TEIRV Inference
-==================================================
-Loading NPE model from workflows/resume_run_20250714_152416/npe_model.pkl
-Loaded TEIRV model from workflows/resume_run_20250714_152416/npe_model.pkl
-✅ NPE model loaded successfully
-
-Loading clinical data...
-Found 6 patient datasets: ['443108', '445602', '444391', '444332', '432192', '451152']
-Loaded patient 443108: 14 timepoints
-Loaded patient 445602: 14 timepoints
-Loaded patient 444391: 14 timepoints
-Loaded patient 444332: 14 timepoints
-Loaded patient 432192: 14 timepoints
-Loaded patient 451152: 14 timepoints
-✅ Found 6 patients
-Filtered 6/6 patients meeting criteria
-✅ Processing 6 patients
-Prepared patient 443108: torch.Size([11])
-Prepared patient 445602: torch.Size([11])
-Prepared patient 444391: torch.Size([11])
-Prepared patient 444332: torch.Size([11])
-Prepared patient 432192: torch.Size([11])
-Prepared patient 451152: torch.Size([11])
-
-Performing NPE inference (20000 samples per patient)...
-
-Processing patient 443108
-  ✅ Completed in 3.99s
-
-Processing patient 445602
-  ✅ Completed in 0.11s
-
-Processing patient 444391
-  ✅ Completed in 0.10s
-
-Processing patient 444332
-  ✅ Completed in 0.10s
-
-Processing patient 432192
-  ✅ Completed in 0.10s
-
-Processing patient 451152
-  ✅ Completed in 0.10s
-Creating corner plot for patient 443108
-  ✅ Corner plot saved
-Creating predictive plot for patient 443108
-  Generating prediction using posterior mean...
-    Using posterior mean: [1.75524788e+01 5.30800171e+02 3.88042068e+00 5.59309032e-04
- 4.82169926e-01 1.07737724e+02]
-  ✅ Generated posterior mean prediction in 5.4s
-  ✅ Predictive plot saved
-Creating corner plot for patient 445602
-  ✅ Corner plot saved
-Creating predictive plot for patient 445602
-  Generating prediction using posterior mean...
-    Using posterior mean: [1.5332513e+01 5.0226276e+02 4.5131855e+00 6.1417341e-01 4.7683144e-01
- 7.7879639e+01]
-  ✅ Generated posterior mean prediction in 5.1s
-  ✅ Predictive plot saved
-Creating corner plot for patient 444391
-  ✅ Corner plot saved
-Creating predictive plot for patient 444391
-  Generating prediction using posterior mean...
-    Using posterior mean: [ 1.81954288e+01  5.30571411e+02  3.70068288e+00 -1.05815701e-01
-  4.68946576e-01  1.06139626e+02]
-  ✅ Generated posterior mean prediction in 5.4s
-  ✅ Predictive plot saved
-Creating corner plot for patient 444332
-  ✅ Corner plot saved
-Creating predictive plot for patient 444332
-  Generating prediction using posterior mean...
-    Using posterior mean: [ 1.7212471e+01  5.0733771e+02  4.2220678e+00 -7.2715811e-02
-  4.8188955e-01  7.9635872e+01]
-  ✅ Generated posterior mean prediction in 5.4s
-  ✅ Predictive plot saved
-Creating corner plot for patient 432192
-  ✅ Corner plot saved
-Creating predictive plot for patient 432192
-  Generating prediction using posterior mean...
-    Using posterior mean: [ 15.354813  510.66986     4.2395854   1.0809302   0.5145402  95.703636 ]
-  ✅ Generated posterior mean prediction in 5.0s
-  ✅ Predictive plot saved
-Creating corner plot for patient 451152
-  ✅ Corner plot saved
-Creating predictive plot for patient 451152
-  Generating prediction using posterior mean...
-    Using posterior mean: [1.6067266e+01 5.1394733e+02 4.3496504e+00 4.0060398e-01 4.7937188e-01
- 1.0120172e+02]
-  ✅ Generated posterior mean prediction in 5.2s
-  ✅ Predictive plot saved
-
-✅ CLINICAL INFERENCE COMPLETED
-⏱️  Total time: 4.55 seconds
-📁 Results saved to workflows/resume_run_20250714_152416/inference_results
-==========================================
-Resume workflow completed at Mon Jul 14 16:34:20 AEST 2025
-Exit code: 0
-✅ RESUME WORKFLOW COMPLETED SUCCESSFULLY
-📁 Results available in: workflows/resume_run_20250714_152416
-
-Generated files:
-  - workflows/resume_run_20250714_152416/npe_model.pkl
-  - workflows/resume_run_20250714_152416/inference_results/
-
-To view results:
-  ls -la workflows/resume_run_20250714_152416/
-  cat workflows/resume_run_20250714_152416/inference_results/clinical_parameter_estimates.csv
-==========================================
-
-+------------------ Job Report: 2234988 (COMPLETED) -------------------+
-| Memory (RAM)  [##                  ] 14.9% (2.4 GB peak / 16 GB)     |
-| CPU           [####                ] 20.5% average                   |
-| GPU           [#####               ] 29.6% average                   |
-| Time          [->                  ]  9.8% (0-01:10:16 / 0-12:00:00) |
-|                                                                      |
-| Lustre Filesystem:                                                   |
-|   Path    Total Read    Total Write    Total IOPS                    |
-|   ------  ------------  -------------  ------------                  |
-|   /fred   1.3 GB        331.7 MB       33 K                          |
-|   /home   60 KB         0 B            22                            |
-|   OS      0 B           0 B            26                            |
-|                                                                      |
-| Warnings:                                                            |
-|   - Too much memory requested                                        |
-|   - CPU usage is low                                                 |
-|   - GPU usage is low                                                 |
-|   - Too much time requested                                          |
-+----------------------------------------------------------------------+

@@ -1,0 +1,55 @@
+# Default TEIRV Model Configuration
+
+# Prior parameters
+priors:
+  beta:
+    type: uniform
+    low: 0.0
+    high: 20.0
+  pi:
+    type: uniform  
+    low: 200.0
+    high: 600.0
+  delta:
+    type: uniform
+    low: 1.0
+    high: 11.0
+  phi:
+    type: uniform
+    low: 0.0
+    high: 15.0
+  rho:
+    type: uniform
+    low: 0.0
+    high: 1.0
+  V0:
+    type: log_uniform
+    low: 1.0
+    high: 148.0
+
+# Model parameters
+model:
+  n_dim: 6  # Number of parameters (beta, pi, delta, phi, rho, V0)
+  
+# Initial conditions
+initial_conditions:
+  T0: 2.0e8      # Initial target cells
+  E0: 0.0        # Initial eclipsed cells
+  I0: 0.0        # Initial infectious cells  
+  R0: 0.0        # Initial refractory cells
+  c: 23.0        # Viral clearance rate (fixed)
+  k: 4.0         # Progression rate (fixed)
+
+# Simulation parameters
+simulation:
+  t_max: 10.0                    # Maximum simulation time
+  dt: 1.0                        # Time step for observations
+  max_steps: 100000              # Maximum Gillespie steps
+  extinction_threshold: 1.0e-6   # Threshold for extinction
+
+# Observation model
+observation:
+  type: rt_pcr
+  noise_std: 1.0           # Observation noise standard deviation
+  detection_limit: -0.65   # RT-PCR detection limit (log10)
+  use_observations_only: true  # Only use observation data (not full states)

@@ -1,0 +1,29 @@
+# Core ML libraries
+torch
+torchvision
+torchaudio
+numpy
+scipy
+
+# Data handling
+pandas
+
+# Visualization
+matplotlib
+seaborn
+
+# Progress bars
+tqdm
+
+# Simulation-based inference
+sbi
+
+# Tensorboard for logging
+tensorboard
+
+# Corner plots
+corner
+
+# Development and notebooks
+jupyter
+notebook

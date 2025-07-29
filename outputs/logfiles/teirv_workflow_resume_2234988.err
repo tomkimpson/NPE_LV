@@ -1,31 +1,0 @@
-Traceback (most recent call last):
-  File "<string>", line 7, in <module>
-KeyError: 'observation_type'
-/fred/oz022/tkimpson/conda_envs/NPE_LV/lib/python3.11/site-packages/sbi/inference/trainers/npe/npe_base.py:158: UserWarning: Data x has device 'cpu'. Moving x to the data_device 'cuda'. Training will proceed on device 'cuda'.
-  theta, x = validate_theta_and_x(
-/fred/oz022/tkimpson/conda_envs/NPE_LV/lib/python3.11/site-packages/sbi/inference/trainers/npe/npe_base.py:158: UserWarning: Parameters theta has device 'cpu'. Moving theta to the data_device 'cuda'. Training will proceed on device 'cuda'.
-  theta, x = validate_theta_and_x(
-/fred/oz022/tkimpson/NPE_LV/src/TEIRV/teirv_inference.py:327: UserWarning: When the inference object is pickled, the behaviour of the loaded object changes in the following two ways: 1) `.train(..., retrain_from_scratch=True)` is not supported. 2) When the loaded object calls the `.train()` method, it generates a new tensorboard summary writer (instead of appending to the current one).
-  pickle.dump(data, f)
-
-real	62m45.023s
-user	56m36.708s
-sys	0m7.570s
-Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]/fred/oz022/tkimpson/conda_envs/NPE_LV/lib/python3.11/site-packages/nflows/transforms/lu.py:80: UserWarning: torch.triangular_solve is deprecated in favor of torch.linalg.solve_triangularand will be removed in a future PyTorch release.
-torch.linalg.solve_triangular has its arguments reversed and does not return a copy of one of the inputs.
-X = torch.triangular_solve(B, A).solution
-should be replaced with
-X = torch.linalg.solve_triangular(A, B). (Triggered internally at ../aten/src/ATen/native/BatchLinearAlgebra.cpp:2190.)
-  outputs, _ = torch.triangular_solve(
-Drawing 20000 posterior samples:  50%|█████     | 10000/20000 [00:03<00:03, 2558.54it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:03<00:00, 5015.11it/s]
-Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 190622.02it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 190082.96it/s]
-Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 197122.06it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 196488.57it/s]
-Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 198082.79it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 197516.11it/s]
-Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 197969.66it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 197444.05it/s]
-Drawing 20000 posterior samples:   0%|          | 0/20000 [00:00<?, ?it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 197675.29it/s]Drawing 20000 posterior samples: 100%|██████████| 20000/20000 [00:00<00:00, 197298.24it/s]
-WARNING:root:Too few points to create valid contours
-WARNING:root:Too few points to create valid contours
-
-real	5m42.572s
-user	0m52.285s
-sys	0m5.630s

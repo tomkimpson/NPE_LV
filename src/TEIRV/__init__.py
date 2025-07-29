@@ -1,1 +1,0 @@
-# NPE for Lotka-Volterra model

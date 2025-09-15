@@ -133,31 +133,25 @@ git submodule update --init --recursive
 
 ## Implementation Phases
 
-### ✅ Phase 1: TEIRV Simulator (Complete)
+### Phase 1: TEIRV Simulator 
 - Gillespie algorithm implementation for 7-reaction TEIRV model
 - Proper parameter scaling and reaction rate computation
 - RT-PCR observation model with detection limits
 - Comprehensive testing and validation
 
-### ✅ Phase 2: NPE Training Pipeline (Complete)
+### Phase 2: NPE Training Pipeline 
 - Custom prior distributions (mixed Uniform/log-Uniform)
 - Neural posterior estimation with SBI library
 - Training data generation with batch processing
 - Corner plots and posterior visualization
 - Model saving and loading infrastructure
 
-### ✅ Phase 3: Clinical Data Integration (Complete)
+### Phase 3: Clinical Data Integration 
 - Clinical data loading from JSFGermano2024 repository
 - Patient filtering and quality control
 - Individual patient inference pipeline
 - Comprehensive visualization and reporting
 - Multi-patient batch processing
-
-### 🚧 Phase 4: Performance Optimization (Future)
-- JAX implementation for GPU acceleration
-- Real-time inference capabilities
-- Large-scale population studies
-- Clinical deployment optimization
 
 ## Quick Start
 

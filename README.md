@@ -431,57 +431,18 @@ python scripts/test_teirv_simulator.py
 - **Memory usage**: ~100MB for typical analyses
 - **Scalability**: Handles hundreds of patients efficiently
 
-## Comparison with Particle Filter
 
-| Method | Computational Cost | Flexibility | Accuracy | Scalability |
-|--------|-------------------|-------------|----------|-------------|
-| Particle Filter (Original) | High | Limited | High | Poor |
-| NPE (This Work) | Low | High | Comparable | Excellent |
 
-## Key Features
-
-- ✅ **Exact viral dynamics**: Full Gillespie simulation with proper kinetics
-- ✅ **Clinical data integration**: Real COVID patient RT-PCR data
-- ✅ **Efficient inference**: 1000x faster than particle filtering
-- ✅ **Comprehensive validation**: Extensive testing and quality control
-- ✅ **Publication-ready output**: Professional plots and numerical summaries
-- ✅ **Flexible pipeline**: Easy adaptation to new datasets and models
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Missing clinical data**: Ensure submodule is initialized properly
-2. **Slow training**: Reduce batch size or use GPU acceleration
-3. **Memory errors**: Lower number of posterior samples
-4. **Parameter bounds**: Ensure estimates are within prior support
-
-### Performance Tips
-
-1. **Pre-train models**: Save and reuse NPE models across analyses
-2. **Batch processing**: Analyze multiple patients in single run
-3. **GPU usage**: Train on GPU, infer on CPU for clinical deployment
-4. **Model selection**: Use appropriate network size for dataset
 
 ## References
 
-- Germano et al. (2024). "TEIVR model for COVID-19 viral dynamics" (JSF repository)
+- Germano et al. (2024). https://arxiv.org/abs/2405.13239
 - Tejero-Cantero et al. (2020). "sbi: A toolkit for simulation-based inference"
 - Papamakarios et al. (2019). "Sequential Neural Likelihood"
 - Gillespie, D. T. (1977). "Exact stochastic simulation of coupled chemical reactions"
 
-## Citation
 
-If you use this code in your research, please cite:
 
-```bibtex
-@misc{npe_teirv_2024,
-  title={Neural Posterior Estimation for Viral Dynamics: TEIRV Model Implementation},
-  author={Your Name},
-  year={2024},
-  url={https://github.com/your-repo/NPE_LV}
-}
-```
 
 ## License
 

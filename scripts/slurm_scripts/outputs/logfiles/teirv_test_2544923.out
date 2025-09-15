@@ -1,0 +1,354 @@
+==========================================
+TEIRV NPE Parameter Scaling Test
+==========================================
+Job ID: 2544923
+Node: gina1
+Start time: Wed Jul 23 17:12:16 AEST 2025
+Workflow name: test_scaling_20250723_171216
+Training samples: 5000
+Device: cuda
+Max epochs: 200
+Hidden features: 128
+Transforms: 4
+
+🎯 Test Goals:
+  - Verify parameter scaling works correctly
+  - Check that β×10^-7 and φ×10^-5 specifications are respected
+  - Ensure prior bounds: β(0,20), π(200,400), δ(1,10), φ(0,15), ρ(0,1)
+  - Confirm V0 log-scaling: V0 ~ exp(Uniform(0,5))
+==========================================
+Checking CUDA availability...
+CUDA available: True
+CUDA devices: 1
+NVIDIA GPU info:
+Wed Jul 23 17:14:13 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:C1:00.0 Off |                    0 |
+| N/A   25C    P0             59W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+==========================================
+🧪 Running parameter scaling verification test...
+==========================================
+🧪 TEIRV Parameter Scaling Verification
+==================================================
+🔍 Testing Parameter Bounds
+==============================
+✅ beta: (0.0, 20.0)
+✅ pi: (200.0, 400.0)
+✅ delta: (1.0, 10.0)
+✅ phi: (0.0, 15.0)
+✅ rho: (0.0, 1.0)
+✅ v0: (np.float64(1.0), np.float64(148.4131591025766))
+
+Parameter bounds test: PASSED
+
+🔍 Testing Scaling Equivalence
+==============================
+Raw parameter values (pre-scaling):
+β_raw: 8.832
+φ_raw: 3.974
+
+Scaled parameter values (post-scaling):
+β_scaled: 8.832257e-07
+φ_scaled: 3.974405e-05
+
+✅ Simulation successful with new approach
+Final virion count: 4.48e+03
+
+Parameter verification:
+β_effective = 8.832257e-07 (should be ≈ 8.832 × 10^-7 = 8.832257e-07)
+φ_effective = 3.974405e-05 (should be ≈ 3.974 × 10^-5 = 3.974405e-05)
+
+Scaling equivalence test: PASSED
+
+🔍 Testing Prior Sampling
+==============================
+β samples range: [3.000021e-09, 1.999498e-06]
+Expected β range: [0, 2.000000e-06]
+φ samples range: [3.244489e-07, 1.499639e-04]
+Expected φ range: [0, 1.500000e-04]
+π samples range: [200.0, 400.0]
+Expected π range: [200, 400]
+δ samples range: [1.0, 10.0]
+Expected δ range: [1, 10]
+
+Prior sampling test: PASSED
+
+==================================================
+📊 SUMMARY
+==================================================
+Parameter bounds: ✅ PASSED
+Scaling equivalence: ✅ PASSED
+Prior sampling: ✅ PASSED
+
+Overall result: 🎉 ALL TESTS PASSED
+
+✅ The TEIRV workflow is ready for production!
+   - Parameter bounds match specifications exactly
+   - Scaling equivalence is maintained
+   - Prior sampling works correctly
+✅ Parameter scaling test PASSED - proceeding with workflow
+==========================================
+Starting test TEIRV workflow at Wed Jul 23 17:15:10 AEST 2025
+🚀 TEIRV NPE Complete Pipeline
+==================================================
+📁 Workflow directory: workflows/test_scaling_20250723_171216
+📊 Training samples: 5000
+🔧 Device: cuda
+
+🔬 Step 1: Generating training data...
+🔬 TEIRV Training Data Generation
+==================================================
+Samples: 5000
+Simulation timespan: [0, 10.0] days
+Observation grid: 11 points at 1.0-day intervals
+Observation type: RT-PCR only
+RT-PCR noise: 1.0
+Detection limit: -0.65
+Output: workflows/test_scaling_20250723_171216/training_data.pkl
+
+TEIRV Parameter Priors:
+------------------------------
+  β (infection rate):       Uniform(0.0, 20.0)
+  π (virion production):    Uniform(200.0, 400.0)
+  δ (cell clearance):       Uniform(1.0, 10.0)
+  φ (interferon protection): Uniform(0.0, 15.0)
+  ρ (reversion rate):       Uniform(0.0, 1.0)
+  V₀ (initial virions):     exp(Uniform(0.0, 5.0)) ≈ [1, 148]
+
+Starting data generation...
+Generated 5000/5000 valid samples (0 failed)
+Saved TEIRV data to workflows/test_scaling_20250723_171216/training_data.pkl
+Data shapes: theta=torch.Size([5000, 6]), x=torch.Size([5000, 10])
+
+✅ DATA GENERATION COMPLETED
+⏱️  Generation time: 4629.5 seconds
+📊 Generated 5000 valid samples
+⚡ Generation rate: 1.1 samples/second
+
+🧠 Step 2: Training NPE model...
+🧠 TEIRV NPE Model Training
+==================================================
+Data: workflows/test_scaling_20250723_171216/training_data.pkl
+Output: workflows/test_scaling_20250723_171216/npe_model.pkl
+Device: cuda
+
+✅ Loaded 5000 training samples
+Parameter shape: torch.Size([5000, 6])
+Observation shape: torch.Size([5000, 10])
+Observation type: rt_pcr
+Starting training...
+Training TEIRV NPE with 5000 samples...
+Parameter shape: torch.Size([5000, 6])
+Observation shape: torch.Size([5000, 10])
+Observation type: rt_pcr
+🎯 Enhanced Training Configuration:
+   • Max epochs: 200
+   • Early stopping patience: 100
+   • Learning rate: 0.001
+   • Learning rate scheduler: True
+   • Training batch size: 256
+   • Validation fraction: 0.15
+   • LR scheduler: ReduceLROnPlateau (display only - not yet supported)
+ Training neural network. Epochs trained: 1 Training neural network. Epochs trained: 2 Training neural network. Epochs trained: 3 Training neural network. Epochs trained: 4 Training neural network. Epochs trained: 5 Training neural network. Epochs trained: 6 Training neural network. Epochs trained: 7 Training neural network. Epochs trained: 8 Training neural network. Epochs trained: 9 Training neural network. Epochs trained: 10 Training neural network. Epochs trained: 11 Training neural network. Epochs trained: 12 Training neural network. Epochs trained: 13 Training neural network. Epochs trained: 14 Training neural network. Epochs trained: 15 Training neural network. Epochs trained: 16 Training neural network. Epochs trained: 17 Training neural network. Epochs trained: 18 Training neural network. Epochs trained: 19 Training neural network. Epochs trained: 20 Training neural network. Epochs trained: 21 Training neural network. Epochs trained: 22 Training neural network. Epochs trained: 23 Training neural network. Epochs trained: 24 Training neural network. Epochs trained: 25 Training neural network. Epochs trained: 26 Training neural network. Epochs trained: 27 Training neural network. Epochs trained: 28 Training neural network. Epochs trained: 29 Training neural network. Epochs trained: 30 Training neural network. Epochs trained: 31 Training neural network. Epochs trained: 32 Training neural network. Epochs trained: 33 Training neural network. Epochs trained: 34 Training neural network. Epochs trained: 35 Training neural network. Epochs trained: 36 Training neural network. Epochs trained: 37 Training neural network. Epochs trained: 38 Training neural network. Epochs trained: 39 Training neural network. Epochs trained: 40 Training neural network. Epochs trained: 41 Training neural network. Epochs trained: 42 Training neural network. Epochs trained: 43 Training neural network. Epochs trained: 44 Training neural network. Epochs trained: 45 Training neural network. Epochs trained: 46 Training neural network. Epochs trained: 47 Training neural network. Epochs trained: 48 Training neural network. Epochs trained: 49 Training neural network. Epochs trained: 50 Training neural network. Epochs trained: 51 Training neural network. Epochs trained: 52 Training neural network. Epochs trained: 53 Training neural network. Epochs trained: 54 Training neural network. Epochs trained: 55 Training neural network. Epochs trained: 56 Training neural network. Epochs trained: 57 Training neural network. Epochs trained: 58 Training neural network. Epochs trained: 59 Training neural network. Epochs trained: 60 Training neural network. Epochs trained: 61 Training neural network. Epochs trained: 62 Training neural network. Epochs trained: 63 Training neural network. Epochs trained: 64 Training neural network. Epochs trained: 65 Training neural network. Epochs trained: 66 Training neural network. Epochs trained: 67 Training neural network. Epochs trained: 68 Training neural network. Epochs trained: 69 Training neural network. Epochs trained: 70 Training neural network. Epochs trained: 71 Training neural network. Epochs trained: 72 Training neural network. Epochs trained: 73 Training neural network. Epochs trained: 74 Training neural network. Epochs trained: 75 Training neural network. Epochs trained: 76 Training neural network. Epochs trained: 77 Training neural network. Epochs trained: 78 Training neural network. Epochs trained: 79 Training neural network. Epochs trained: 80 Training neural network. Epochs trained: 81 Training neural network. Epochs trained: 82 Training neural network. Epochs trained: 83 Training neural network. Epochs trained: 84 Training neural network. Epochs trained: 85 Training neural network. Epochs trained: 86 Training neural network. Epochs trained: 87 Training neural network. Epochs trained: 88 Training neural network. Epochs trained: 89 Training neural network. Epochs trained: 90 Training neural network. Epochs trained: 91 Training neural network. Epochs trained: 92 Training neural network. Epochs trained: 93 Training neural network. Epochs trained: 94 Training neural network. Epochs trained: 95 Training neural network. Epochs trained: 96 Training neural network. Epochs trained: 97 Training neural network. Epochs trained: 98 Training neural network. Epochs trained: 99 Training neural network. Epochs trained: 100 Training neural network. Epochs trained: 101 Training neural network. Epochs trained: 102 Training neural network. Epochs trained: 103 Training neural network. Epochs trained: 104 Training neural network. Epochs trained: 105 Training neural network. Epochs trained: 106 Training neural network. Epochs trained: 107 Training neural network. Epochs trained: 108 Training neural network. Epochs trained: 109 Training neural network. Epochs trained: 110 Training neural network. Epochs trained: 111 Training neural network. Epochs trained: 112 Training neural network. Epochs trained: 113 Training neural network. Epochs trained: 114 Training neural network. Epochs trained: 115 Training neural network. Epochs trained: 116 Training neural network. Epochs trained: 117 Training neural network. Epochs trained: 118 Neural network successfully converged after 118 epochs.
+        -------------------------
+        ||||| ROUND 1 STATS |||||:
+        -------------------------
+        Epochs trained: 118
+        Best validation performance: -10.4017
+        -------------------------
+        
+📊 Training completed successfully!
+   • Training epochs: Completed with early stopping
+   • Training batch size: 256
+   • Learning rate: 0.001
+   • Max epochs: 200
+📊 Assessing posterior quality with 2000 samples...
+📈 Prior parameter statistics:
+   • beta: mean=0.000, std=0.000
+   • pi: mean=299.112, std=58.170
+   • delta: mean=5.385, std=2.590
+   • phi: mean=0.000, std=0.000
+   • rho: mean=0.502, std=0.285
+   • v0: mean=28.738, std=35.699
+   • Posterior quality assessed with 2000 samples
+   • Model ready for clinical inference
+Saved TEIRV model to workflows/test_scaling_20250723_171216/npe_model.pkl
+
+✅ TRAINING COMPLETED
+⏱️  Training time: 275.7 seconds
+📁 Model saved to workflows/test_scaling_20250723_171216/npe_model.pkl
+
+🏥 Step 3: Running inference...
+🏥 TEIRV Inference
+==================================================
+Loading NPE model from workflows/test_scaling_20250723_171216/npe_model.pkl
+Using device: cuda
+Loaded TEIRV model from workflows/test_scaling_20250723_171216/npe_model.pkl
+✅ NPE model loaded successfully
+
+Loading clinical data...
+Found 6 patient datasets: ['443108', '445602', '444391', '444332', '432192', '451152']
+Loaded patient 443108: 14 timepoints
+Loaded patient 445602: 14 timepoints
+Loaded patient 444391: 14 timepoints
+Loaded patient 444332: 14 timepoints
+Loaded patient 432192: 14 timepoints
+Loaded patient 451152: 14 timepoints
+✅ Found 6 patients
+Filtered 6/6 patients meeting criteria
+✅ Processing 6 patients
+Prepared patient 443108: torch.Size([10])
+Prepared patient 445602: torch.Size([10])
+Prepared patient 444391: torch.Size([10])
+Prepared patient 444332: torch.Size([10])
+Prepared patient 432192: torch.Size([10])
+Prepared patient 451152: torch.Size([10])
+
+Performing NPE inference (2000 samples per patient)...
+
+Processing patient 443108
+  ✅ Completed in 1.67s
+
+Processing patient 445602
+  ✅ Completed in 0.02s
+
+Processing patient 444391
+  ✅ Completed in 0.02s
+
+Processing patient 444332
+  ✅ Completed in 0.02s
+
+Processing patient 432192
+  ✅ Completed in 0.02s
+
+Processing patient 451152
+  ✅ Completed in 0.02s
+Creating corner plot for patient 443108
+  ✅ Corner plot saved
+Creating predictive plot for patient 443108
+  Generating prediction using posterior mean...
+    Using posterior mean: [ 1.1829521e-06  3.3612897e+02  5.5177231e+00 -8.8900897e-06
+  6.2414378e-01  1.7264294e+01]
+  ✅ Generated posterior mean prediction in 10.6s
+  ✅ Predictive plot saved
+Creating corner plot for patient 445602
+  ✅ Corner plot saved
+Creating predictive plot for patient 445602
+  Generating prediction using posterior mean...
+    Using posterior mean: [1.0535986e-06 3.2429694e+02 5.6368556e+00 1.0374454e-05 6.0871202e-01
+ 2.2909075e+01]
+  ✅ Generated posterior mean prediction in 10.3s
+  ✅ Predictive plot saved
+Creating corner plot for patient 444391
+  ✅ Corner plot saved
+Creating predictive plot for patient 444391
+  Generating prediction using posterior mean...
+    Using posterior mean: [ 1.2351450e-06  3.4117508e+02  5.8099370e+00 -1.3740372e-05
+  6.0491496e-01  1.7652105e+01]
+  ✅ Generated posterior mean prediction in 10.6s
+  ✅ Predictive plot saved
+Creating corner plot for patient 444332
+  ✅ Corner plot saved
+Creating predictive plot for patient 444332
+  Generating prediction using posterior mean...
+    Using posterior mean: [ 1.2295291e-06  3.4057724e+02  6.2063866e+00 -1.0774256e-05
+  5.9151590e-01  1.8506966e+01]
+  ✅ Generated posterior mean prediction in 10.6s
+  ✅ Predictive plot saved
+Creating corner plot for patient 432192
+  ✅ Corner plot saved
+Creating predictive plot for patient 432192
+  Generating prediction using posterior mean...
+    Using posterior mean: [9.1025129e-07 3.2154965e+02 5.8029537e+00 1.2714725e-05 6.3033187e-01
+ 2.0622776e+01]
+  ✅ Generated posterior mean prediction in 10.7s
+  ✅ Predictive plot saved
+Creating corner plot for patient 451152
+  ✅ Corner plot saved
+Creating predictive plot for patient 451152
+  Generating prediction using posterior mean...
+    Using posterior mean: [1.0425448e-06 3.2698685e+02 5.7162652e+00 4.3333362e-06 5.6226796e-01
+ 2.6246946e+01]
+  ✅ Generated posterior mean prediction in 10.7s
+  ✅ Predictive plot saved
+
+✅ CLINICAL INFERENCE COMPLETED
+⏱️  Total time: 1.79 seconds
+📁 Results saved to workflows/test_scaling_20250723_171216/inference_results
+
+🎉 COMPLETE PIPELINE FINISHED
+⏱️  Total time: 5009.8 seconds (83.5 minutes)
+📁 All results in: workflows/test_scaling_20250723_171216
+==========================================
+Test workflow completed at Wed Jul 23 18:42:15 AEST 2025
+Exit code: 0
+✅ TEST WORKFLOW COMPLETED SUCCESSFULLY
+📁 Results available in: workflows/test_scaling_20250723_171216
+
+🔍 Quick Results Validation:
+----------------------------------------
+✅ Training data generated successfully
+✅ NPE model trained successfully
+✅ Clinical inference completed successfully
+
+📊 Parameter Estimates Preview:
+----------------------------------------
+patient_id,β_mean,β_q025,β_q975,π_mean,π_q025,π_q975,δ_mean,δ_q025,δ_q975,φ_mean,φ_q025,φ_q975,ρ_mean,ρ_q025,ρ_q975,V₀_mean,V₀_q025,V₀_q975,inference_time,n_samples
+443108,1.182952e-06,1.44039e-07,2.0097282e-06,336.129,211.33905,396.5366,5.5177226,1.573379,10.086484,-8.89009e-06,-1.3839354e-05,-2.556834e-06,0.6241438,0.026430644,1.0078113,17.264296,0.51192886,141.62683,1.6729764938354492,2000
+445602,1.0535986e-06,8.410379e-08,1.986956e-06,324.29697,208.36975,396.01508,5.636856,1.3999827,9.9684925,1.0374453e-05,-3.9958654e-06,7.062782e-05,0.608712,0.030986244,0.99824214,22.909077,1.1242118,138.10628,0.01717686653137207,2000
+----------------------------------------
+ℹ️  Parameter interpretation:
+  - β_mean: infection rate (should be ≈ raw_β × 10^-7)
+  - φ_mean: interferon protection (should be ≈ raw_φ × 10^-5)
+  - π_mean: virion production (200-400 range)
+  - δ_mean: cell clearance (1-10 range)
+  - V₀_mean: initial virions (exp-distributed)
+
+Generated files:
+total 7430
+drwxr-sr-x  3 tkimpson oz022   11776 Jul 23 18:40 .
+drwxr-sr-x 14 tkimpson oz022   12800 Jul 23 17:18 ..
+drwxr-sr-x  8 tkimpson oz022   11776 Jul 23 18:42 inference_results
+-rw-r--r--  1 tkimpson oz022 8527190 Jul 23 18:40 npe_model.pkl
+-rw-r--r--  1 tkimpson oz022  321241 Jul 23 18:35 training_data.pkl
+
+🎉 TEST COMPLETED - Parameter scaling verification successful!
+Ready for production runs with full parameters.
+==========================================
+📋 TEST SUMMARY:
+  Parameter scaling test: 0
+  Full workflow test: 0
+  Overall status: ✅ READY FOR PRODUCTION
+==========================================
+
++------------------ Job Report: 2544923 (COMPLETED) -------------------+
+| Memory (RAM)  [####                ] 22.9% (1.8 GB peak / 8 GB)      |
+| CPU           [########            ] 43.4% average                   |
+| GPU           [                    ]  0.4% average                   |
+| Time          [------->            ] 37.8% (0-01:30:50 / 0-04:00:00) |
+|                                                                      |
+| Lustre Filesystem:                                                   |
+|   Path    Total Read    Total Write    Total IOPS                    |
+|   ------  ------------  -------------  ------------                  |
+|   /apps   0 B           0 B            712                           |
+|   /fred   841.7 MB      13.4 MB        28.7 K                        |
+|   /home   27.4 MB       0 B            20                            |
+|   OS      964 KB        0 B            21                            |
+|                                                                      |
+| Warnings:                                                            |
+|   - Too much memory requested                                        |
+|   - CPU usage is low                                                 |
+|   - GPU usage is low                                                 |
+|   - Too much time requested                                          |
++----------------------------------------------------------------------+

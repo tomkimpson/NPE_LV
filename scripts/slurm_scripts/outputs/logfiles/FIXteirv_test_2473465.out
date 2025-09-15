@@ -1,0 +1,232 @@
+==========================================
+TEIRV NPE Parameter Scaling Test
+==========================================
+Job ID: 2473465
+Node: gina17
+Start time: Tue Jul 22 18:20:28 AEST 2025
+Workflow name: test_scaling_20250722_182028
+Training samples: 5000
+Device: cuda
+Max epochs: 200
+Hidden features: 128
+Transforms: 4
+
+🎯 Test Goals:
+  - Verify parameter scaling works correctly
+  - Check that β×10^-7 and φ×10^-5 specifications are respected
+  - Ensure prior bounds: β(0,20), π(200,400), δ(1,10), φ(0,15), ρ(0,1)
+  - Confirm V0 log-scaling: V0 ~ exp(Uniform(0,5))
+==========================================
+Checking CUDA availability...
+CUDA available: True
+CUDA devices: 1
+NVIDIA GPU info:
+Tue Jul 22 18:20:52 2025       
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 570.148.08             Driver Version: 570.148.08     CUDA Version: 12.8     |
+|-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA A100-SXM4-80GB          On  |   00000000:41:00.0 Off |                    0 |
+| N/A   26C    P0             62W /  500W |       0MiB /  81920MiB |      0%      Default |
+|                                         |                        |             Disabled |
++-----------------------------------------+------------------------+----------------------+
+                                                                                         
++-----------------------------------------------------------------------------------------+
+| Processes:                                                                              |
+==========================================
+🧪 Running parameter scaling verification test...
+==========================================
+🧪 TEIRV Parameter Scaling Verification
+==================================================
+🔍 Testing Parameter Bounds
+==============================
+✅ beta: (0.0, 20.0)
+✅ pi: (200.0, 400.0)
+✅ delta: (1.0, 10.0)
+✅ phi: (0.0, 15.0)
+✅ rho: (0.0, 1.0)
+✅ v0: (np.float64(1.0), np.float64(148.4131591025766))
+
+Parameter bounds test: PASSED
+
+🔍 Testing Scaling Equivalence
+==============================
+Raw parameter values (pre-scaling):
+β_raw: 10.368
+φ_raw: 8.427
+
+Scaled parameter values (post-scaling):
+β_scaled: 1.036833e-06
+φ_scaled: 8.427339e-05
+
+✅ Simulation successful with new approach
+Final virion count: 3.88e+03
+
+Parameter verification:
+β_effective = 1.036833e-06 (should be ≈ 10.368 × 10^-7 = 1.036833e-06)
+φ_effective = 8.427339e-05 (should be ≈ 8.427 × 10^-5 = 8.427339e-05)
+
+Scaling equivalence test: PASSED
+
+🔍 Testing Prior Sampling
+==============================
+β samples range: [4.981756e-10, 1.997239e-06]
+Expected β range: [0, 2.000000e-06]
+φ samples range: [9.288490e-08, 1.497507e-04]
+Expected φ range: [0, 1.500000e-04]
+π samples range: [200.3, 400.0]
+Expected π range: [200, 400]
+δ samples range: [1.0, 10.0]
+Expected δ range: [1, 10]
+
+Prior sampling test: PASSED
+
+==================================================
+📊 SUMMARY
+==================================================
+Parameter bounds: ✅ PASSED
+Scaling equivalence: ✅ PASSED
+Prior sampling: ✅ PASSED
+
+Overall result: 🎉 ALL TESTS PASSED
+
+✅ The TEIRV workflow is ready for production!
+   - Parameter bounds match specifications exactly
+   - Scaling equivalence is maintained
+   - Prior sampling works correctly
+✅ Parameter scaling test PASSED - proceeding with workflow
+==========================================
+Starting test TEIRV workflow at Tue Jul 22 18:21:06 AEST 2025
+🚀 TEIRV NPE Complete Pipeline
+==================================================
+📁 Workflow directory: workflows/test_scaling_20250722_182028
+📊 Training samples: 5000
+🔧 Device: cuda
+
+🔬 Step 1: Generating training data...
+🔬 TEIRV Training Data Generation
+==================================================
+Samples: 5000
+Simulation timespan: [0, 10.0] days
+Observation grid: 11 points at 1.0-day intervals
+Observation type: RT-PCR only
+RT-PCR noise: 1.0
+Detection limit: -0.65
+Output: workflows/test_scaling_20250722_182028/training_data.pkl
+
+TEIRV Parameter Priors:
+------------------------------
+  β (infection rate):       Uniform(0.0, 20.0)
+  π (virion production):    Uniform(200.0, 400.0)
+  δ (cell clearance):       Uniform(1.0, 10.0)
+  φ (interferon protection): Uniform(0.0, 15.0)
+  ρ (reversion rate):       Uniform(0.0, 1.0)
+  V₀ (initial virions):     exp(Uniform(0.0, 5.0)) ≈ [1, 148]
+
+Starting data generation...
+Generated 5000/5000 valid samples (0 failed)
+Saved TEIRV data to workflows/test_scaling_20250722_182028/training_data.pkl
+Data shapes: theta=torch.Size([5000, 6]), x=torch.Size([5000, 10])
+
+✅ DATA GENERATION COMPLETED
+⏱️  Generation time: 2163.7 seconds
+📊 Generated 5000 valid samples
+⚡ Generation rate: 2.3 samples/second
+
+🧠 Step 2: Training NPE model...
+🧠 TEIRV NPE Model Training
+==================================================
+Data: workflows/test_scaling_20250722_182028/training_data.pkl
+Output: workflows/test_scaling_20250722_182028/npe_model.pkl
+Device: cuda
+
+✅ Loaded 5000 training samples
+Parameter shape: torch.Size([5000, 6])
+Observation shape: torch.Size([5000, 10])
+Observation type: rt_pcr
+Starting training...
+Training TEIRV NPE with 5000 samples...
+Parameter shape: torch.Size([5000, 6])
+Observation shape: torch.Size([5000, 10])
+Observation type: rt_pcr
+🎯 Enhanced Training Configuration:
+   • Max epochs: 200
+   • Early stopping patience: 100
+   • Learning rate: 0.001
+   • Learning rate scheduler: True
+   • Training batch size: 256
+   • Validation fraction: 0.15
+   • LR scheduler: ReduceLROnPlateau (display only - not yet supported)
+ Training neural network. Epochs trained: 1 Training neural network. Epochs trained: 2 Training neural network. Epochs trained: 3 Training neural network. Epochs trained: 4 Training neural network. Epochs trained: 5 Training neural network. Epochs trained: 6 Training neural network. Epochs trained: 7 Training neural network. Epochs trained: 8 Training neural network. Epochs trained: 9 Training neural network. Epochs trained: 10 Training neural network. Epochs trained: 11 Training neural network. Epochs trained: 12 Training neural network. Epochs trained: 13 Training neural network. Epochs trained: 14 Training neural network. Epochs trained: 15 Training neural network. Epochs trained: 16 Training neural network. Epochs trained: 17 Training neural network. Epochs trained: 18 Training neural network. Epochs trained: 19 Training neural network. Epochs trained: 20 Training neural network. Epochs trained: 21 Training neural network. Epochs trained: 22 Training neural network. Epochs trained: 23 Training neural network. Epochs trained: 24 Training neural network. Epochs trained: 25 Training neural network. Epochs trained: 26 Training neural network. Epochs trained: 27 Training neural network. Epochs trained: 28 Training neural network. Epochs trained: 29 Training neural network. Epochs trained: 30 Training neural network. Epochs trained: 31 Training neural network. Epochs trained: 32 Training neural network. Epochs trained: 33 Training neural network. Epochs trained: 34 Training neural network. Epochs trained: 35 Training neural network. Epochs trained: 36 Training neural network. Epochs trained: 37 Training neural network. Epochs trained: 38 Training neural network. Epochs trained: 39 Training neural network. Epochs trained: 40 Training neural network. Epochs trained: 41 Training neural network. Epochs trained: 42 Training neural network. Epochs trained: 43 Training neural network. Epochs trained: 44 Training neural network. Epochs trained: 45 Training neural network. Epochs trained: 46 Training neural network. Epochs trained: 47 Training neural network. Epochs trained: 48 Training neural network. Epochs trained: 49 Training neural network. Epochs trained: 50 Training neural network. Epochs trained: 51 Training neural network. Epochs trained: 52 Training neural network. Epochs trained: 53 Training neural network. Epochs trained: 54 Training neural network. Epochs trained: 55 Training neural network. Epochs trained: 56 Training neural network. Epochs trained: 57 Training neural network. Epochs trained: 58 Training neural network. Epochs trained: 59 Training neural network. Epochs trained: 60 Training neural network. Epochs trained: 61 Training neural network. Epochs trained: 62 Training neural network. Epochs trained: 63 Training neural network. Epochs trained: 64 Training neural network. Epochs trained: 65 Training neural network. Epochs trained: 66 Training neural network. Epochs trained: 67 Training neural network. Epochs trained: 68 Training neural network. Epochs trained: 69 Training neural network. Epochs trained: 70 Training neural network. Epochs trained: 71 Training neural network. Epochs trained: 72 Training neural network. Epochs trained: 73 Training neural network. Epochs trained: 74 Training neural network. Epochs trained: 75 Training neural network. Epochs trained: 76 Training neural network. Epochs trained: 77 Training neural network. Epochs trained: 78 Training neural network. Epochs trained: 79 Training neural network. Epochs trained: 80 Training neural network. Epochs trained: 81 Training neural network. Epochs trained: 82 Training neural network. Epochs trained: 83 Training neural network. Epochs trained: 84 Training neural network. Epochs trained: 85 Training neural network. Epochs trained: 86 Training neural network. Epochs trained: 87 Training neural network. Epochs trained: 88 Training neural network. Epochs trained: 89 Training neural network. Epochs trained: 90 Training neural network. Epochs trained: 91 Training neural network. Epochs trained: 92 Training neural network. Epochs trained: 93 Training neural network. Epochs trained: 94 Training neural network. Epochs trained: 95 Training neural network. Epochs trained: 96 Training neural network. Epochs trained: 97 Training neural network. Epochs trained: 98 Training neural network. Epochs trained: 99 Training neural network. Epochs trained: 100 Training neural network. Epochs trained: 101 Training neural network. Epochs trained: 102 Training neural network. Epochs trained: 103 Training neural network. Epochs trained: 104 Training neural network. Epochs trained: 105 Training neural network. Epochs trained: 106 Training neural network. Epochs trained: 107 Training neural network. Epochs trained: 108 Training neural network. Epochs trained: 109 Training neural network. Epochs trained: 110 Training neural network. Epochs trained: 111 Training neural network. Epochs trained: 112 Training neural network. Epochs trained: 113 Training neural network. Epochs trained: 114 Training neural network. Epochs trained: 115 Training neural network. Epochs trained: 116 Training neural network. Epochs trained: 117 Training neural network. Epochs trained: 118 Neural network successfully converged after 118 epochs.
+        -------------------------
+        ||||| ROUND 1 STATS |||||:
+        -------------------------
+        Epochs trained: 118
+        Best validation performance: -10.4017
+        -------------------------
+        
+📊 Training completed successfully!
+   • Training epochs: Completed with early stopping
+   • Training batch size: 256
+   • Learning rate: 0.001
+   • Max epochs: 200
+📊 Assessing posterior quality with 2000 samples...
+📈 Prior parameter statistics:
+   • beta: mean=0.000, std=0.000
+   • pi: mean=299.112, std=58.170
+   • delta: mean=5.385, std=2.590
+   • phi: mean=0.000, std=0.000
+   • rho: mean=0.502, std=0.285
+   • v0: mean=28.738, std=35.699
+   • Posterior quality assessed with 2000 samples
+   • Model ready for clinical inference
+Saved TEIRV model to workflows/test_scaling_20250722_182028/npe_model.pkl
+
+✅ TRAINING COMPLETED
+⏱️  Training time: 92.9 seconds
+📁 Model saved to workflows/test_scaling_20250722_182028/npe_model.pkl
+
+🏥 Step 3: Running inference...
+🏥 TEIRV Inference
+==================================================
+Loading NPE model from workflows/test_scaling_20250722_182028/npe_model.pkl
+❌ Failed to load NPE model: 'Namespace' object has no attribute 'device'
+==========================================
+Test workflow completed at Tue Jul 22 18:59:50 AEST 2025
+Exit code: 1
+❌ TEST WORKFLOW FAILED with exit code 1
+🚨 Parameter scaling may have issues - check logs before production
+
+Check the log files for details:
+  - Standard output: outputs/logfiles/teirv_test_2473465.out
+  - Standard error: outputs/logfiles/teirv_test_2473465.err
+==========================================
+📋 TEST SUMMARY:
+  Parameter scaling test: 0
+  Full workflow test: 1
+  Overall status: ❌ NEEDS DEBUGGING
+==========================================
+
++------------------ Job Report: 2473465 (COMPLETED) -------------------+
+| Memory (RAM)  [####                ] 22.4% (1.8 GB peak / 8 GB)      |
+| CPU           [#########           ] 46.1% average                   |
+| GPU           [                    ]  0.3% average                   |
+| Time          [--->                ] 16.6% (0-00:39:44 / 0-04:00:00) |
+|                                                                      |
+| Lustre Filesystem:                                                   |
+|   Path    Total Read    Total Write    Total IOPS                    |
+|   ------  ------------  -------------  ------------                  |
+|   /apps   796 KB        0 B            16                            |
+|   /fred   609.9 MB      349.3 KB       24.3 K                        |
+|   /home   27.4 MB       0 B            12                            |
+|   OS      4 KB          0 B            13                            |
+|                                                                      |
+| Warnings:                                                            |
+|   - Too much memory requested                                        |
+|   - CPU usage is low                                                 |
+|   - GPU usage is low                                                 |
+|   - Too much time requested                                          |
++----------------------------------------------------------------------+

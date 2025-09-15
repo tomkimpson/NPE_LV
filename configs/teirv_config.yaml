@@ -1,0 +1,171 @@
+# TEIRV NPE Unified Configuration
+# This file consolidates all TEIRV parameters for data generation, training, and inference
+
+# Data generation and simulation parameters
+data:
+  # Training data generation
+  generation:
+    n_samples: 50000          # Number of training samples (can be overridden by --n_samples)
+    batch_size: 500           # Batch size for generation
+    seed: 42                  # Random seed for reproducibility
+    success_rate_threshold: 0.95  # Minimum simulation success rate
+    max_attempts: 3           # Max attempts for batch generation
+    
+  # Simulation parameters
+  simulation:
+    t_max: 10.0               # Maximum simulation time (days)
+    dt: 1.0                   # Time step for observations (days)
+    max_steps: 100000         # Maximum Gillespie steps
+    extinction_threshold: 1.0e-6  # Threshold for extinction
+    
+  # Observation model
+  observation:
+    type: rt_pcr
+    noise_std: 1.0            # Observation noise standard deviation
+    detection_limit: -0.65    # RT-PCR detection limit (log10)
+    use_observations_only: true  # Only use observation data (not full states)
+    
+  # Clinical data processing
+  clinical:
+    # Data paths
+    paths:
+      clinical_data_dir: external/JSFGermano2024/TEIVR_Results/particle-filter-example-tiv_covid/data
+      processed_data_dir: data/processed
+      raw_data_dir: data/raw
+      results_dir: results
+      
+    # Patient filtering criteria
+    patient_filtering:
+      min_detections: 5         # Minimum number of detectable viral loads
+      min_peak_viral_load: 2.0  # Minimum peak viral load (log10)
+      max_missing_timepoints: 5 # Maximum missing consecutive timepoints
+      
+    # Data quality thresholds
+    quality_control:
+      detection_rate_threshold: 0.8  # Minimum detection rate
+      outlier_threshold: 3.0         # Standard deviations for outlier detection
+      
+    # Data preprocessing
+    preprocessing:
+      log_transform: true            # Apply log10 transformation
+      standardize: false             # Whether to standardize data
+      fill_missing: true             # Fill missing values
+      missing_value_strategy: interpolate  # How to handle missing data
+      
+    # Available patient IDs (from JSFGermano2024)
+    available_patients:
+      - "432192"
+      - "443108" 
+      - "444332"
+      - "444391"
+      - "445602"
+      - "451152"
+
+# TEIRV model configuration
+model:
+  n_dim: 6  # Number of parameters (beta, pi, delta, phi, rho, V0)
+  
+  # Prior parameters
+  priors:
+    beta:
+      type: uniform
+      low: 0.0
+      high: 20.0
+    pi:
+      type: uniform  
+      low: 200.0
+      high: 600.0
+    delta:
+      type: uniform
+      low: 1.0
+      high: 11.0
+    phi:
+      type: uniform
+      low: 0.0
+      high: 15.0
+    rho:
+      type: uniform
+      low: 0.0
+      high: 1.0
+    V0:
+      type: log_uniform
+      low: 1.0
+      high: 148.0
+      
+  # Initial conditions
+  initial_conditions:
+    T0: 2.0e8      # Initial target cells
+    E0: 0.0        # Initial eclipsed cells
+    I0: 0.0        # Initial infectious cells  
+    R0: 0.0        # Initial refractory cells
+    c: 23.0        # Viral clearance rate (fixed)
+    k: 4.0         # Progression rate (fixed)
+
+# Neural network architecture
+network:
+  hidden_features: 512      # Number of hidden units
+  num_transforms: 12        # Number of coupling transforms
+  num_bins: 10             # Number of bins for spline transforms
+  batch_norm: true         # Use batch normalization
+
+# Training configuration
+training:
+  batch_size: 512          # Training batch size
+  learning_rate: 5.0e-4    # Initial learning rate
+  max_num_epochs: 1000     # Maximum training epochs
+  validation_fraction: 0.15 # Fraction of data for validation
+  stop_after_epochs: 100   # Early stopping patience
+  
+  # Optimizer settings
+  optimizer:
+    type: adam
+    weight_decay: 1.0e-5
+    
+  # Learning rate scheduler
+  scheduler:
+    type: reduce_on_plateau
+    factor: 0.5
+    patience: 10
+    min_lr: 1.0e-6
+    
+  # Logging
+  logging:
+    log_interval: 10       # Log every N epochs
+    use_tensorboard: true  # Enable tensorboard logging
+    summary_writer_dir: results/experiments/training_logs
+    
+  # Model saving
+  saving:
+    save_best_model: true
+    checkpoint_every: 50   # Save checkpoint every N epochs
+
+# Inference parameters
+inference:
+  n_samples: 20000         # Posterior samples for inference
+  min_detections: 5        # Minimum detections for patient inclusion
+  min_peak_viral_load: 2.0 # Minimum peak viral load
+
+# System configuration
+system:
+  device: cuda             # Use 'cuda' if GPU available, 'cpu' otherwise
+  
+  # Parallel processing
+  parallel:
+    use_multiprocessing: false  # Enable multiprocessing
+    n_workers: 4               # Number of worker processes
+    
+  # Progress tracking
+  progress:
+    show_progress_bar: true    # Show tqdm progress bar
+    log_every_n_batches: 10   # Log progress every N batches
+
+# SLURM configuration
+slurm:
+  job_name: teirv_workflow_full
+  output: results/experiments/slurm_outputs/logfiles/teirv_workflow_%j.out
+  error: results/experiments/slurm_outputs/logfiles/teirv_workflow_%j.err
+  export: ALL
+  gres: gpu:1
+  time: "36:00:00"
+  mem: 16G
+  cpus_per_task: 4

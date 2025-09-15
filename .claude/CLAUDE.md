@@ -1,0 +1,1 @@
+Before running any python commands, ensure that the conda environment `NPE_LV` is first activated

@@ -1,9 +1,20 @@
-# Large data files
-data/
-models/
-workflows/
-results*/
-sbi-logs/
+# Large data files - processed and generated data only
+data/processed/
+data/generated/
+models/production/
+models/checkpoints/
+results/
+test_output/
+
+# Keep data/raw for version control but ignore large files
+data/raw/**/*.pkl
+data/raw/**/*.csv
+data/raw/**/*.h5
+data/raw/**/*.hdf5
+
+# External submodules are tracked by .gitmodules
+# Their contents are managed separately
+external/*
 
 # Python
 __pycache__/
@@ -57,3 +68,25 @@ venv.bak/
 *.log
 *.tmp
 *.temp
+
+# Slurm job outputs
+*.out
+*.err
+scripts/slurm/outputs/
+
+# Additional ML/Data Science files
+*.pkl
+*.pickle
+*.npy
+*.npz
+*.png
+*.jpg
+*.jpeg
+*.pdf
+*.svg
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo

@@ -82,7 +82,7 @@ NPE_LV/
 
 1. **Clone with submodules**:
    ```bash
-   git clone --recursive https://github.com/your-repo/NPE_LV.git
+   git clone --recursive https://github.com/tomkimpson/NPE_LV
    cd NPE_LV
    ```
 
@@ -101,7 +101,7 @@ NPE_LV/
 
 1. **Clone with submodules**:
    ```bash
-   git clone --recursive https://github.com/your-repo/NPE_LV.git
+   git clone --recursive https://github.com/tomkimpson/NPE_LV
    cd NPE_LV
    ```
 
@@ -115,7 +115,7 @@ NPE_LV/
 
 1. **Clone with submodules**:
    ```bash
-   git clone --recursive https://github.com/your-repo/NPE_LV.git
+   git clone --recursive https://github.com/tomkimpson/NPE_LV
    cd NPE_LV
    ```
 

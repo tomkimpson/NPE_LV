@@ -3,9 +3,19 @@
 
 # Data generation and simulation parameters
 data:
-  # Training data generation
+  # Data source configuration
+  # Option 1: Use existing data file
+  #   source: "data/training_50k_v1.pkl"
+  # Option 2: Generate new data
+  #   source: "generate"
+  #   output_name: "training_50k_v2.pkl"  # Name for the generated dataset
+
+  source: "generate"      # "generate" or path to existing .pkl file
+  output_name: "training_200k_20251022.pkl"  # Name for generated data (with corrected beta scaling)
+
+  # Training data generation (only used if source="generate")
   generation:
-    n_samples: 50000          # Number of training samples (can be overridden by --n_samples)
+    n_samples: 200000         # Number of training samples
     batch_size: 500           # Batch size for generation
     seed: 42                  # Random seed for reproducibility
     success_rate_threshold: 0.95  # Minimum simulation success rate
@@ -29,10 +39,7 @@ data:
   clinical:
     # Data paths
     paths:
-      clinical_data_dir: external/JSFGermano2024/TEIVR_Results/particle-filter-example-tiv_covid/data
-      processed_data_dir: data/processed
-      raw_data_dir: data/raw
-      results_dir: results
+      clinical_data_dir: data/clinical
       
     # Patient filtering criteria
     patient_filtering:
@@ -93,13 +100,18 @@ model:
       high: 148.0
       
   # Initial conditions
+  # NOTE: These values are currently NOT used by the code.
+  # Initial conditions and fixed parameters are hardcoded in src/teirv_utils.py:
+  #   - T0 = 8e7, E0 = 1.0, I0 = 0.0, R0 = 0.0 (see get_teirv_initial_conditions())
+  #   - k = 4.0, c = 10.0 (see get_teirv_fixed_parameters())
+  # The values below are commented out to avoid confusion:
   initial_conditions:
-    T0: 2.0e8      # Initial target cells
-    E0: 0.0        # Initial eclipsed cells
-    I0: 0.0        # Initial infectious cells  
-    R0: 0.0        # Initial refractory cells
-    c: 23.0        # Viral clearance rate (fixed)
-    k: 4.0         # Progression rate (fixed)
+    # T0: 2.0e8      # Initial target cells (UNUSED - actual: 8e7)
+    # E0: 0.0        # Initial eclipsed cells (UNUSED - actual: 1.0)
+    # I0: 0.0        # Initial infectious cells (correct but unused)
+    # R0: 0.0        # Initial refractory cells (correct but unused)
+    # c: 23.0        # Viral clearance rate (UNUSED - actual: 10.0)
+    # k: 4.0         # Progression rate (correct but unused)
 
 # Neural network architecture
 network:
@@ -132,7 +144,7 @@ training:
   logging:
     log_interval: 10       # Log every N epochs
     use_tensorboard: true  # Enable tensorboard logging
-    summary_writer_dir: results/experiments/training_logs
+    # Note: log directory will be created automatically within each run directory
     
   # Model saving
   saving:
@@ -161,11 +173,10 @@ system:
 
 # SLURM configuration
 slurm:
-  job_name: teirv_workflow_full
-  output: results/experiments/slurm_outputs/logfiles/teirv_workflow_%j.out
-  error: results/experiments/slurm_outputs/logfiles/teirv_workflow_%j.err
+  job_name: teirv_production
+  # Note: SLURM logs will be created automatically within each run's logs/slurm/ directory
   export: ALL
   gres: gpu:1
   time: "36:00:00"
-  mem: 16G
+  mem: 32G
   cpus_per_task: 4

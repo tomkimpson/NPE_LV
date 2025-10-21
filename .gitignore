@@ -1,16 +1,14 @@
-# Large data files - processed and generated data only
-data/processed/
-data/generated/
-models/production/
-models/checkpoints/
+# Workflow outputs (all per-run results are self-contained here)
 results/
-test_output/
 
-# Keep data/raw for version control but ignore large files
-data/raw/**/*.pkl
-data/raw/**/*.csv
-data/raw/**/*.h5
-data/raw/**/*.hdf5
+# Training data files (large, reusable datasets)
+# These can be regenerated and are typically too large for git
+data/*.pkl
+data/*.h5
+data/*.hdf5
+
+# Test outputs
+test_output/
 
 # External submodules are tracked by .gitmodules
 # Their contents are managed separately
@@ -75,7 +73,7 @@ venv.bak/
 scripts/slurm/outputs/
 
 # Additional ML/Data Science files
-*.pkl
+# Note: .pkl files in data/ are already ignored above
 *.pickle
 *.npy
 *.npz

@@ -61,13 +61,20 @@ class TEIRVWorkflow:
         torch.set_default_dtype(torch.float32)
         
     def setup_workflow_directory(self, workflow_name: Optional[str] = None) -> Path:
-        """Set up directory for workflow outputs."""
+        """Set up directory for workflow outputs with new structure."""
         if workflow_name is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            workflow_name = f"teirv_workflow_{timestamp}"
-        
-        self.workflow_dir = Path(f"results/experiments/production_runs/{workflow_name}")
+            workflow_name = f"run_{timestamp}"
+
+        self.workflow_dir = Path(f"results/{workflow_name}")
         self.workflow_dir.mkdir(parents=True, exist_ok=True)
+
+        # Create subdirectories for the new structure
+        (self.workflow_dir / "model").mkdir(exist_ok=True)
+        (self.workflow_dir / "logs" / "training").mkdir(parents=True, exist_ok=True)
+        (self.workflow_dir / "logs" / "slurm").mkdir(parents=True, exist_ok=True)
+        (self.workflow_dir / "inference").mkdir(exist_ok=True)
+
         return self.workflow_dir
     
     def generate_data(self, args) -> str:
@@ -537,24 +544,27 @@ class TEIRVWorkflow:
         plt.close()
     
     def demo(self, args):
-        """Run quick demo of TEIRV NPE."""
+        """Run quick demo of TEIRV NPE with new structure."""
         print("🎬 TEIRV NPE Demo")
         print("=" * 30)
-        
+
         # Setup demo directory
         demo_dir = self.setup_workflow_directory("demo")
-        
+
         print("This demo will:")
         print("1. Generate small training dataset (1000 samples)")
         print("2. Train a basic NPE model")
         print("3. Run inference on one clinical patient")
         print()
-        
-        # Generate demo data
+
+        # Generate demo data to shared data/ directory
         print("📊 Generating demo training data...")
+        data_path = Path("data") / "demo_data.pkl"
+        data_path.parent.mkdir(parents=True, exist_ok=True)
+
         demo_args = argparse.Namespace(
             n_samples=1000,
-            output=str(demo_dir / "demo_data.pkl"),
+            output=str(data_path),
             batch_size=500,
             seed=42,
             t_max=10.0,
@@ -563,14 +573,19 @@ class TEIRVWorkflow:
             detection_limit=-0.65,
             full_trajectory=False
         )
-        
+
         data_path = self.generate_data(demo_args)
-        
+
+        # Record data source
+        with open(demo_dir / "data_source.txt", 'w') as f:
+            f.write(f"Data source: {data_path}\n")
+            f.write(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+
         # Train demo model
         print("\n🧠 Training demo NPE model...")
         train_args = argparse.Namespace(
-            data=data_path,
-            output=str(demo_dir / "demo_model.pkl"),
+            data=str(data_path),
+            output=str(demo_dir / "model" / "demo_model.pkl"),
             batch_size=256,
             learning_rate=5e-4,
             max_epochs=50,
@@ -581,25 +596,29 @@ class TEIRVWorkflow:
             device=self.device,
             seed=42
         )
-        
+
         model_path = self.train_model(train_args)
-        
+
         # Run inference
         print("\n🏥 Running inference...")
         inference_args = argparse.Namespace(
             model=model_path,
-            output=str(demo_dir / "inference_results"),
+            output=str(demo_dir / "inference"),
             n_samples=5000,
             patients=None,
             min_detections=5,
             min_peak_vl=2.0,
-            data_dir=None
+            data_dir=None,
+            device=self.device
         )
-        
+
         self.inference(inference_args)
-        
+
         print(f"\n✅ DEMO COMPLETED")
         print(f"📁 All results in: {demo_dir}")
+        print(f"📊 Training data: {data_path}")
+        print(f"🧠 Model: {demo_dir}/model/demo_model.pkl")
+        print(f"🏥 Inference results: {demo_dir}/inference/")
     
     def load_config(self, config_path: str) -> Dict:
         """Load configuration from YAML file."""
@@ -672,56 +691,77 @@ class TEIRVWorkflow:
         return merged_args
     
     def full_pipeline(self, args):
-        """Run complete end-to-end pipeline."""
+        """Run complete end-to-end pipeline with new directory structure."""
         print("🚀 TEIRV NPE Complete Pipeline")
         print("=" * 50)
-        
+
         # Load and merge config if provided
+        config = None
         config_file_path = None
         if hasattr(args, 'config') and args.config is not None:
             config_file_path = args.config
             config = self.load_config(args.config)
             args = self.merge_config_args(config, args)
-        
+
         workflow_dir = self.setup_workflow_directory(args.workflow_name)
-        
+
         # Copy config file to workflow directory for reproducibility
         if config_file_path is not None:
             try:
-                config_dest = workflow_dir / "config_used.yaml"
+                config_dest = workflow_dir / "config.yaml"
                 shutil.copy2(config_file_path, config_dest)
                 print(f"📋 Config file copied to: {config_dest}")
             except Exception as e:
                 print(f"⚠️  Warning: Could not copy config file: {e}")
-        
+
         print(f"📁 Workflow directory: {workflow_dir}")
-        print(f"📊 Training samples: {args.n_samples}")
         print(f"🔧 Device: {args.device}")
         print()
-        
+
         total_start = time.time()
-        
-        # Step 1: Data Generation
-        print("🔬 Step 1: Generating training data...")
-        data_args = argparse.Namespace(
-            n_samples=args.n_samples,
-            output=str(workflow_dir / "training_data.pkl"),
-            batch_size=args.batch_size,
-            seed=args.seed,
-            t_max=args.t_max,
-            dt=args.dt,
-            observation_noise=args.observation_noise,
-            detection_limit=args.detection_limit,
-            full_trajectory=args.full_trajectory
-        )
-        
-        data_path = self.generate_data(data_args)
-        
+
+        # Step 1: Handle training data (use existing or generate new)
+        print("📊 Step 1: Handling training data...")
+        data_source = config.get('data', {}).get('source', 'generate') if config else 'generate'
+
+        if data_source == "generate":
+            # Generate new training data and save to shared data/ directory
+            output_name = config.get('data', {}).get('output_name', 'training_data.pkl') if config else 'training_data.pkl'
+            data_path = Path("data") / output_name
+            data_path.parent.mkdir(parents=True, exist_ok=True)
+
+            print(f"  Generating new training data: {data_path}")
+            data_args = argparse.Namespace(
+                n_samples=args.n_samples,
+                output=str(data_path),
+                batch_size=args.batch_size,
+                seed=args.seed,
+                t_max=args.t_max,
+                dt=args.dt,
+                observation_noise=args.observation_noise,
+                detection_limit=args.detection_limit,
+                full_trajectory=args.full_trajectory
+            )
+            data_path = self.generate_data(data_args)
+        else:
+            # Use existing training data
+            data_path = Path(data_source)
+            if not data_path.exists():
+                print(f"❌ Error: Specified data file not found: {data_path}")
+                sys.exit(1)
+            print(f"  Using existing training data: {data_path}")
+
+        # Record which data was used in workflow directory
+        data_info_path = workflow_dir / "data_source.txt"
+        with open(data_info_path, 'w') as f:
+            f.write(f"Data source: {data_path}\n")
+            f.write(f"Timestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+
         # Step 2: Model Training
-        print("\n🧠 Step 2: Training NPE model...")
+        print(f"\n🧠 Step 2: Training NPE model...")
         train_args = argparse.Namespace(
-            data=data_path,
-            output=str(workflow_dir / "npe_model.pkl"),
+            data=str(data_path),
+            output=str(workflow_dir / "model" / "npe_model.pkl"),
             batch_size=args.train_batch_size,
             learning_rate=args.learning_rate,
             max_epochs=args.max_epochs,
@@ -732,29 +772,38 @@ class TEIRVWorkflow:
             device=args.device,
             seed=args.seed
         )
-        
+
         model_path = self.train_model(train_args)
-        
+
         # Step 3: Inference
         print("\n🏥 Step 3: Running inference...")
+
+        # Get clinical data directory from config if available
+        clinical_data_dir = None
+        if config and 'data' in config and 'clinical' in config['data']:
+            clinical_data_dir = config['data']['clinical'].get('paths', {}).get('clinical_data_dir', None)
+
         inference_args = argparse.Namespace(
             model=model_path,
-            output=str(workflow_dir / "inference_results"),
+            output=str(workflow_dir / "inference"),
             n_samples=args.inference_samples,
             patients=None,
             min_detections=args.min_detections,
             min_peak_vl=args.min_peak_vl,
-            data_dir=None,
-            device=args.device  # Fix: Add missing device parameter
+            data_dir=clinical_data_dir,
+            device=args.device
         )
-        
+
         self.inference(inference_args)
-        
+
         total_time = time.time() - total_start
-        
+
         print(f"\n🎉 COMPLETE PIPELINE FINISHED")
         print(f"⏱️  Total time: {total_time:.1f} seconds ({total_time/60:.1f} minutes)")
         print(f"📁 All results in: {workflow_dir}")
+        print(f"📊 Training data: {data_path}")
+        print(f"🧠 Model: {workflow_dir}/model/npe_model.pkl")
+        print(f"🏥 Inference results: {workflow_dir}/inference/")
 
 
 def main():

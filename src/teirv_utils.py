@@ -66,8 +66,8 @@ class TEIRVPrior(torch.distributions.Distribution):
         v0 = torch.exp(lnv0)
         
         # Apply explicit scaling transformations to match prior specifications:
-        # β×10^-7 ~ Uniform(0,20) and φ×10^-5 ~ Uniform(0,15)
-        beta_scaled = beta * 1e-7  # β×10^-7 specification
+        # β×10^-9 ~ Uniform(0,20) and φ×10^-5 ~ Uniform(0,15)
+        beta_scaled = beta * 1e-9  # β×10^-9 specification (matches JSFGermano2024)
         phi_scaled = phi * 1e-5    # φ×10^-5 specification
         
         # Stack parameters: [β_scaled, π, δ, φ_scaled, ρ, V₀]
@@ -82,9 +82,9 @@ class TEIRVPrior(torch.distributions.Distribution):
         beta_scaled, pi, delta, phi_scaled, rho, v0 = value.unbind(-1)
         
         # 1. Un-scale parameters back to their prior domains
-        beta_unscaled = beta_scaled / 1e-7
+        beta_unscaled = beta_scaled / 1e-9
         phi_unscaled = phi_scaled / 1e-5
-        
+
         # 2. Compute log probabilities on original parameter scales
         log_prob = torch.zeros_like(beta_scaled)
         log_prob += self.beta_dist.log_prob(beta_unscaled)
@@ -92,10 +92,10 @@ class TEIRVPrior(torch.distributions.Distribution):
         log_prob += self.delta_dist.log_prob(delta)
         log_prob += self.phi_dist.log_prob(phi_unscaled)
         log_prob += self.rho_dist.log_prob(rho)
-        
+
         # 3. Add Jacobian corrections for scaling transformations
         # For y = f(x) = a*x, the Jacobian correction is -log(a)
-        log_prob -= torch.log(torch.tensor(1e-7, device=log_prob.device))  # beta scaling
+        log_prob -= torch.log(torch.tensor(1e-9, device=log_prob.device))  # beta scaling
         log_prob -= torch.log(torch.tensor(1e-5, device=log_prob.device))  # phi scaling
         
         # 4. Log-uniform for V₀: p(V₀) = p(ln(V₀)) / V₀  
@@ -240,9 +240,9 @@ def calculate_r0(posterior_samples: np.ndarray) -> np.ndarray:
     
     Where:
     - π: virion production rate (parameter index 1)
-    - β: infection rate (parameter index 0, pre-scaled by 10⁻⁷ in prior)
+    - β: infection rate (parameter index 0, pre-scaled by 10⁻⁹ in prior)
     - T(0): initial target cells = 8×10⁷
-    - δ: cell clearance rate (parameter index 2) 
+    - δ: cell clearance rate (parameter index 2)
     - c: viral clearance rate = 10.0 (fixed)
     
     Parameters:

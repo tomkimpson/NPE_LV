@@ -488,9 +488,12 @@ class TEIRVInference:
         phi = samples[..., 3]     # φ
         rho = samples[..., 4]     # ρ
         v0 = samples[..., 5]      # V₀
-        
+
         # Transform V₀ to log₁₀V₀
-        log10_v0 = torch.log10(v0)
+        # Clamp to avoid log(0) = -inf or log(negative) = NaN
+        # Min value: 1e-10 corresponds to log₁₀(1e-10) = -10
+        v0_safe = torch.clamp(v0, min=1e-10)
+        log10_v0 = torch.log10(v0_safe)
         
         # Reorder to display order [β, ρ, π, φ, δ, log₁₀V₀]
         display_samples = torch.stack([
@@ -539,17 +542,19 @@ class TEIRVInference:
                 display_true_theta = self._prepare_samples_for_display(true_theta.unsqueeze(0)).squeeze(0)
             
             # Parameter labels in new order
-            param_labels = [r'$\beta$', r'$\rho$', r'$\pi$', 
+            param_labels = [r'$\beta$', r'$\rho$', r'$\pi$',
                            r'$\phi$', r'$\delta$', r'$\log_{10}V_0$']
-            
-            # Prior bounds based on JSF/Germano2024 + 10% inflation for comparison
+
+            # Prior bounds matching exact prior ranges from JSFGermano2024
+            # Display order: [β, ρ, π, φ, δ, log₁₀V₀]
+            # Note: β and φ are scaled (×10⁻⁹ and ×10⁻⁵ respectively)
             prior_bounds = [
-                (0.0, 22.0),     # β: JSF [0, 20] + 10%
-                (0.0, 1.1),      # ρ: JSF [0, 1] + 10%
-                (180.0, 660.0),  # π: JSF [200, 600] expanded + 10%  
-                (0.0, 16.5),     # φ: JSF [0, 15] + 10%
-                (0.9, 12.1),     # δ: JSF [1, 11] + 10%
-                (0.0, 5.5)       # lnV₀: JSF [0, 5] + 10%
+                (0.0, 20.0e-9),   # β: Uniform(0, 20) × 10⁻⁹ = [0, 2×10⁻⁸]
+                (0.0, 1.0),       # ρ: Uniform(0, 1)
+                (200.0, 600.0),   # π: Uniform(200, 600)
+                (0.0, 15.0e-5),   # φ: Uniform(0, 15) × 10⁻⁵ = [0, 1.5×10⁻⁴]
+                (1.0, 11.0),      # δ: Uniform(1, 11)
+                (0.0, 2.17)       # log₁₀V₀: V₀ = exp(Uniform(0,5)) → log₁₀(V₀) ∈ [0, 2.17]
             ]
             
             # Default corner plot settings

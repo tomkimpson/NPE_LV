@@ -18,63 +18,38 @@ Given RT-PCR observations with detection limits and noise, we use NPE to infer t
 
 ## Project Structure
 
+The project uses a clean, organized structure where each workflow run creates a self-contained directory:
+
 ```
 NPE_LV/
-├── data/                              # Data directory
-│   ├── raw/                           # Raw, unprocessed datasets
-│   ├── processed/                     # Cleaned, transformed data ready for training
-│   └── generated/                     # Data generated for simulation-based inference
-├── models/                            # Model directory
-│   ├── checkpoints/                   # Intermediate model weights during training
-│   └── production/                    # Final, trained models ready for inference
-├── notebooks/                         # Jupyter notebooks
-│   ├── exploratory/                   # Initial data analysis, prototyping
-│   └── results_analysis/              # Model performance analysis, visualizations
-├── src/                               # Core source code (simplified flat structure)
-│   ├── teirv_simulator.py             # Gillespie algorithm for TEIRV model
-│   ├── teirv_data_generation.py       # NPE training data generation
-│   ├── teirv_inference.py             # Neural posterior estimation training/inference
-│   ├── clinical_data.py               # Clinical data loading and processing
-│   ├── teirv_utils.py                 # TEIRV utilities, priors, and helpers
-│   └── legacy/                        # Legacy implementations for reference
-├── scripts/                           # Executable scripts
-│   ├── slurm/                         # Slurm job submission scripts
-│   │   ├── run_teirv_workflow.sh      # Main workflow script
-│   │   ├── resume_teirv_training.sh   # Resume training script
-│   │   └── workflows/                 # Additional workflow scripts
-│   └── local/                         # Local utility scripts
-│       ├── TEIRV_workflow.py          # TEIRV workflow implementation
-│       ├── deploy_jsf_teirv.py        # JSF TEIRV deployment
-│       └── teirv_jsf_examples.py      # Examples and demos
-├── configs/                           # Configuration files
-│   ├── model_configs/                 # Model hyperparameters
-│   │   └── teirv_default.yaml         # Default TEIRV configuration
-│   ├── training_configs/              # Training parameters
-│   │   └── npe_default.yaml           # Default NPE training config
-│   └── data_configs/                  # Data paths, processing parameters
-│       ├── clinical_data.yaml         # Clinical data configuration
-│       └── synthetic_data.yaml        # Synthetic data generation config
-├── results/                           # Results and outputs
-│   ├── experiments/                   # Logs, metrics, plots from experiments
-│   │   ├── production_runs/           # Production experiment results
-│   │   ├── training_logs/             # SBI training logs (tensorboard)
-│   │   └── slurm_outputs/             # Slurm job outputs
-│   ├── predictions/                   # Model predictions and outputs
-│   └── reports/                       # Final reports, summary documents
-├── tests/                             # Test files
-├── external/                          # External repositories (preserved)
-│   └── JSFGermano2024/                # Clinical data source
-├── papers/                            # Research papers (preserved)
-├── sandbox/                           # Experimental code (preserved)
-├── development_notes/                 # Development documentation (renamed from docs/)
-│   ├── phase3_clinical_integration.md
-│   ├── teirv_implementation_plan.md
-│   └── checkpoint_*.md
-├── .gitignore                         # Git ignore file
-├── requirements.txt                   # Python dependencies
-├── setup.py                           # Package installation script
-└── environment.yml                    # Conda environment specification
+├── src/                               # Core Python code
+│   ├── main.py                        # Main workflow script
+│   ├── teirv_simulator.py             # Gillespie algorithm
+│   ├── teirv_data_generation.py       # Training data generation
+│   ├── teirv_inference.py             # Neural posterior estimation
+│   ├── clinical_data.py               # Clinical data processing
+│   └── teirv_utils.py                 # Utilities and helpers
+├── scripts/slurm/                     # Slurm execution scripts
+│   └── run_production.sh              # Main production workflow
+├── configs/                           # Configuration templates
+│   └── teirv_config.yaml              # Unified configuration file
+├── data/                              # Reusable training datasets (shared)
+│   └── *.pkl                          # Training data files
+├── results/                           # Per-run outputs (self-contained)
+│   └── run_YYYYMMDD_HHMMSS/           # Each run in its own directory
+│       ├── config.yaml                # Config used for this run
+│       ├── data_source.txt            # Training data source
+│       ├── model/npe_model.pkl        # Trained model
+│       ├── logs/                      # Training + slurm logs
+│       └── inference/                 # Patient inference results
+└── external/JSFGermano2024/           # Clinical COVID data (submodule)
 ```
+
+**Key Design Principles:**
+- **Training data is reusable**: Store in `data/`, specify in config
+- **Each workflow run is self-contained**: Everything in `results/run_TIMESTAMP/`
+- **Config-driven**: All settings in `configs/teirv_config.yaml`
+- **Easy comparison**: Compare runs by comparing directories
 
 ## Installation
 
@@ -155,51 +130,61 @@ git submodule update --init --recursive
 
 ## Quick Start
 
-### Option 1: Quick Demo
+### Option 1: Production Workflow (Recommended)
+
+Edit `configs/teirv_config.yaml` to configure data source and parameters:
+
+```yaml
+data:
+  source: "generate"                    # or "data/training_large_78MB.pkl"
+  output_name: "training_50k_v1.pkl"   # name for generated data
+  generation:
+    n_samples: 50000                   # training samples
+```
+
+Then run:
+
 ```bash
 conda activate NPE_LV
-python src/main.py demo  # 2-3 minutes
+
+# For local execution
+python src/main.py full --config configs/teirv_config.yaml
+
+# For HPC/Slurm execution
+sbatch scripts/slurm/run_production.sh
 ```
 
-### Option 2: Complete Manual Workflow
+All outputs will be in `results/run_YYYYMMDD_HHMMSS/`
+
+### Option 2: Quick Demo
+
 ```bash
 conda activate NPE_LV
-
-# Step 1: Generate training data (5-10 minutes)
-python src/main.py generate \
-    --n_samples 5000 \
-    --output data/processed/manual_training.pkl
-
-# Step 2: Train NPE model (15-30 minutes)
-python src/main.py train \
-    --data data/processed/manual_training.pkl \
-    --output models/production/manual_model.pkl
-
-# Step 3: Run clinical inference (2-5 minutes)
-python src/main.py inference \
-    --model models/production/manual_model.pkl \
-    --output results/predictions/manual_results
+python src/main.py demo  # 2-3 minutes, uses small dataset
 ```
 
-### Option 3: Complete Pipeline
-```bash
-# Run complete end-to-end pipeline
-python src/main.py full --n_samples 10000
+### Option 3: Reuse Existing Training Data
 
-# Run via Slurm (for HPC environments)
-sbatch scripts/slurm/run_teirv_workflow.sh
+To train a new model on existing data, edit `configs/teirv_config.yaml`:
+
+```yaml
+data:
+  source: "data/training_large_78MB.pkl"  # Use existing dataset
 ```
 
-### Option 4: Individual Commands
+Then run the full pipeline - it will skip data generation and use the existing data.
+
+### Option 4: Individual Commands (Advanced)
+
 ```bash
 # Generate training data only
-python src/main.py generate --n_samples 50000
+python src/main.py generate --n_samples 50000 --output data/my_data.pkl
 
 # Train model only
-python src/main.py train --data data/processed/training.pkl
+python src/main.py train --data data/my_data.pkl --output my_model.pkl
 
 # Run inference only
-python src/main.py inference --model models/production/npe.pkl
+python src/main.py inference --model my_model.pkl --output my_results/
 ```
 
 ## Clinical Data

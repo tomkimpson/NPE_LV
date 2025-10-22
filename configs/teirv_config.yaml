@@ -10,8 +10,8 @@ data:
   #   source: "generate"
   #   output_name: "training_50k_v2.pkl"  # Name for the generated dataset
 
-  source: "generate"      # "generate" or path to existing .pkl file
-  output_name: "training_200k_20251022.pkl"  # Name for generated data (with corrected beta scaling)
+  source: "data/training_200k_20251022.pkl"      # "generate" or path to existing .pkl file
+  output_name: "NONE"  # Name for generated data (with corrected beta scaling)
 
   # Training data generation (only used if source="generate")
   generation:
@@ -115,18 +115,18 @@ model:
 
 # Neural network architecture
 network:
-  hidden_features: 512      # Number of hidden units
-  num_transforms: 12        # Number of coupling transforms
-  num_bins: 10             # Number of bins for spline transforms
+  hidden_features: 2048     # Number of hidden units (INCREASED for aggressive training)
+  num_transforms: 20        # Number of coupling transforms (INCREASED)
+  num_bins: 16             # Number of bins for spline transforms (INCREASED)
   batch_norm: true         # Use batch normalization
 
 # Training configuration
 training:
   batch_size: 512          # Training batch size
-  learning_rate: 5.0e-4    # Initial learning rate
+  learning_rate: 2.0e-4    # Initial learning rate (REDUCED for more stable convergence)
   max_num_epochs: 1000     # Maximum training epochs
-  validation_fraction: 0.15 # Fraction of data for validation
-  stop_after_epochs: 100   # Early stopping patience
+  validation_fraction: 0.10 # Fraction of data for validation (REDUCED - more data for training)
+  stop_after_epochs: 300   # Early stopping patience (INCREASED - allow much longer training)
   
   # Optimizer settings
   optimizer:
@@ -136,8 +136,8 @@ training:
   # Learning rate scheduler
   scheduler:
     type: reduce_on_plateau
-    factor: 0.5
-    patience: 10
+    factor: 0.8            # More gradual LR reduction (INCREASED from 0.5)
+    patience: 30           # Wait longer before reducing LR (INCREASED from 10)
     min_lr: 1.0e-6
     
   # Logging
